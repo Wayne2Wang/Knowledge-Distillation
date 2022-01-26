@@ -36,7 +36,7 @@ def train_ff(
 	summary(model, (1,input_size))
 
 
-  # Move to GPU if specified
+    # Move to GPU if specified
 	if gpu:
 		ff_model = model.cuda()
 		X_train = X_train.cuda()
@@ -49,7 +49,7 @@ def train_ff(
 	if verbose:
 		print('Start training: \{}, {}, batch_size={}, epoch={}, lr={}\n'.format(optimizer.__name__, criterion.__name__, batch_size, epochs, lr))
   
-  # Start training
+    # Start training
 	for epoch in range(epochs):
 
 		# Shuffle the data for each epoch
@@ -105,9 +105,6 @@ def train_ff(
 
 def main():
 	pass
-
-
-
 
 
 
