@@ -2,111 +2,86 @@ import math
 import time
 import torch
 from torchsummary import summary
+from data import CIFAR10
 
 
 import utils
-from models import feed_forward
+from models import feed_forward, fit_ff
+import argparse
 
 
-def train_ff(
-	data, 
-	load_model='', 
-	epochs=100, 
-	hidden_sizes = [2000,1000,100], 
-	batch_size=256, 
-	lr=0.001, 
-	gpu=True, 
-	verbose=False):
-
-	# Read data
-	X_train, y_train, X_val, y_val = data
-	train_size = X_train.shape[0]
-	input_size = X_train.shape[1]
-	output_size = torch.nn.functional.one_hot(y_train).shape[1]
-
-	# Model initialization
-	if not load_model == '':
-		model, prev_epoch, optimizer, criterion, best_loss = utils.load_checkpoint(load_model, verbose)
-	else:
-		model = feed_forward(input_size, hidden_sizes, output_size)
-		prev_epoch = 0
-		optimizer = torch.optim.AdamW(model.parameters())
-		criterion = torch.nn.CrossEntropyLoss()
-		best_loss = float('inf')
-	summary(model, (1,input_size))
-
-
-    # Move to GPU if specified
-	if gpu:
-		ff_model = model.cuda()
-		X_train = X_train.cuda()
-		y_train = y_train.cuda()
-		X_val = X_val.cuda()
-		y_val = y_val.cuda()
-  
-	# Initialize training
-	start_time = time.time()
-	if verbose:
-		print('Start training: \{}, {}, batch_size={}, epoch={}, lr={}\n'.format(optimizer.__name__, criterion.__name__, batch_size, epochs, lr))
-  
-    # Start training
-	for epoch in range(epochs):
-
-		# Shuffle the data for each epoch
-		shuffler = torch.randperm(train_size)
-		X_train_shuffled = X_train[shuffler]
-		y_train_shuffled = y_train[shuffler]
-
-		total_loss = 0
-		new_best_loss = False
-		model.train()
-		for i in range(math.floor(train_size/batch_size)):
-
-			# Prepare mini-batch
-			start = i*batch_size
-			if (i+1)*batch_size > train_size:
-				end = train_size
-			else:
-				end = (i+1)*batch_size
-				x_batch = X_train_shuffled[start:end]
-				y_batch = y_train_shuffled[start:end]
-
-			# Clear gradient
-			optimizer.zero_grad()
-
-			# Forward pass
-			y_pred = ff_model(x_batch)
-
-			# Compute Loss
-			loss = criterion(y_pred, y_batch)
-
-			# Record loss
-			loss_value = loss.item()
-			total_loss += loss_value
-			if loss_value < best_loss:
-				best_loss = loss_value
-				new_best_loss = True
-
-			# Backward pass
-			loss.backward()
-			optimizer.step()
-
-		if verbose:
-			print('Epoch {}: train loss {}'.format(epoch+1, total_loss/train_size))
-		if new_best_loss:
-			utils.save_checkpoint('log\\imagenet\\best_loss_model.pt',model, prev_epoch+epoch+1, optimizer, criterion, best_loss)
-	
-	if verbose:
-		print('\nTraining finished! Time: {:2f}, best train loss: {}'.format(time.time()-start_time, best_loss))
-	
-	return model
-
+def parse_arg():
+	"""
+		Parse the command line arguments
+	"""
+	parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
+	parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
+	parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset used for training')
+	parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
+	args = parser.parse_args()
+	return args
 
 
 def main():
-	pass
+	# Read the arguments
+	args = parse_arg()
+	load_model = args.load_model
+	verbose = args.verbose
+	dataset = args.dataset
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
+
+	# Read data
+	data_dict, unnormalize = CIFAR10(verbose=verbose, device=device)
+	X_train = data_dict['X_train']
+	y_train = data_dict['y_train']
+	X_val = data_dict['X_val']
+	y_val = data_dict['y_val']
+
+	data = X_train, y_train, X_val, y_val, dataset
+	input_size = X_train.shape[1]
+	output_size = torch.nn.functional.one_hot(y_train).shape[1]
+
+	# hyperparameters
+	hidden_sizes = [2000,1000,100]
+	epochs = 10
+	batch_size = 256
+	lr = 1e-3
 
 
+	# Model initialization
+	model = feed_forward(input_size, hidden_sizes, output_size)
+	prev_epoch = 0
+	optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+	criterion = torch.nn.CrossEntropyLoss()
+	summary(model, (1,input_size), device='cpu')
+
+	# Move to GPU if available
+	model = model.to(device)
+	X_train = X_train.to(device)
+	y_train = y_train.to(device)
+	X_val = X_val.to(device)
+	y_val = y_val.to(device)
+
+	# Load previously trained model if specified
+	if not load_model == '':
+		prev_epoch, _, _, _ = utils.load_checkpoint(model, optimizer, criterion, load_model, verbose)
+
+
+	# Training
+	if verbose:
+		print('\nStart training: epoch={}, prev_epoch={}, batch_size={}, lr={}'.format(epochs, prev_epoch, batch_size, lr))
+	best_loss, train_acc, val_acc, total_time = fit_ff(model,
+		data, 
+		optimizer,
+		criterion,
+		prev_epoch=prev_epoch,
+		epochs=epochs,  
+		batch_size=batch_size, 
+		save_every=1,
+		verbose=verbose)
+
+	if verbose:
+		print('\nTraining finished! \nTime: {:2f}, best train loss: {:5f}, best train acc: {:5f}, best val acc: {:5f}'.format(total_time, best_loss, train_acc, val_acc))
 
 if __name__ == '__main__':
 	main()
