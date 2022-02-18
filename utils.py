@@ -1,4 +1,5 @@
 import torch
+import os
 
 
 def save_checkpoint(path_to_model, model, epoch, optimizer, criterion, loss_value, train_acc, val_acc, verbose=True):
@@ -16,6 +17,12 @@ def save_checkpoint(path_to_model, model, epoch, optimizer, criterion, loss_valu
     - val_acc: Validation accuracy from the last epoch
     - verbose: If True print necessary information
     """
+    # Create directory if not exist
+    path_to_model = 'log\\' + path_to_model
+    dir_path = path_to_model[:path_to_model.rfind('\\')]
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),

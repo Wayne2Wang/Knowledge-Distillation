@@ -2,6 +2,7 @@ import torch
 import utils
 import math
 import time
+from torch.utils.tensorboard import SummaryWriter
 
 class feed_forward(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
@@ -40,6 +41,7 @@ def fit_ff(
 
   
     # Start training
+    writer = SummaryWriter(log_dir='log\\{}'.format(dataset))
     start_time = time.time()
     best_loss = float('inf')
     best_train_acc = 0
@@ -86,18 +88,24 @@ def fit_ff(
         total_loss /= train_size
         train_acc = utils.eval_model_acc(model,X_train,y_train,ratio=0.1)
         val_acc = utils.eval_model_acc(model,X_val,y_val,ratio=0.1)
+
         if train_acc > best_train_acc:
             best_train_acc = train_acc
         if val_acc > best_val_acc:
             best_val_acc = val_acc
         if total_loss < best_loss:
             best_loss = total_loss
+
+        # log training stats
+        writer.add_scalar('Loss/train', total_loss, real_epoch)
+        writer.add_scalar('Accuracy/train', train_acc, real_epoch)
+        writer.add_scalar('Accuracy/val', train_acc, real_epoch)
         
         if verbose:
             print('Epoch {}/{}: train loss {:5f}, train_acc {:5f}, val_acc {:5f}, time {:2f}s'.format(real_epoch, prev_epoch+epochs, total_loss, train_acc, val_acc, time.time()-start_time))
 
         if epoch%save_every == 0:
-            utils.save_checkpoint('log\\{}\\ff_model_{}.pt'.format(dataset, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
+            utils.save_checkpoint('{}\\ff_model_{}.pt'.format(dataset, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
     
     total_time = time.time() - start_time
     return best_loss, best_train_acc, best_val_acc, total_time

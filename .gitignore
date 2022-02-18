@@ -3,6 +3,10 @@ data/
 
 # trained model
 log/
+trained_models/
+
+# tensorboard
+runs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
