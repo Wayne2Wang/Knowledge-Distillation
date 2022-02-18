@@ -10,3 +10,7 @@ python train_ff.py --verbose
 To resume training, run
 
 python train_ff.py --verbose --load_model PATH_TO_MODEL
+
+To view training stats, run
+
+tensorboard --logdir log/DATASET

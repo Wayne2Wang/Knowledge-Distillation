@@ -104,10 +104,12 @@ def fit_ff(
         if verbose:
             print('Epoch {}/{}: train loss {:5f}, train_acc {:5f}, val_acc {:5f}, time {:2f}s'.format(real_epoch, prev_epoch+epochs, total_loss, train_acc, val_acc, time.time()-start_time))
 
-        if epoch%save_every == 0:
+        if (epoch+1)%save_every == 0:
             utils.save_checkpoint('{}\\ff_model_{}.pt'.format(dataset, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
-    
+
+    utils.save_checkpoint('{}\\ff_model_{}.pt'.format(dataset, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
     total_time = time.time() - start_time
+
     return best_loss, best_train_acc, best_val_acc, total_time
             
 

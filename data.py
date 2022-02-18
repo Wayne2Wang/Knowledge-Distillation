@@ -79,7 +79,7 @@ def imagenet1k():
 
 
 def main():
-    CIFAR10('data/')
+    CIFAR10()
 
 if __name__ == '__main__':
     main()
