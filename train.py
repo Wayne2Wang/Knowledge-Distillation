@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from torchsummary import summary
-from utils.data import ImageNet1k
+from datasets import ImageNet1k
 from utils.checkpoint import load_checkpoint
 from models import MLP, fit_model
 import argparse

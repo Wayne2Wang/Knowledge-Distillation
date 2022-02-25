@@ -3,7 +3,7 @@ import torch
 import torchvision
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from utils.data import ImageNet1k
+from datasets import ImageNet1k
 
 """
 A script to evaluate the accuracy of the pretrained resnets
