@@ -43,7 +43,7 @@ def main():
 
 	# Read data
 	if dataset == 'ImageNet1k':	
-		trainset, valset = ImageNet1k(flat=(not resnet))
+		trainset, valset = ImageNet1k(flat=(not resnet),verbose=verbose)
 		data = trainset, valset, dataset
 		output_size = 1000 # number of distinct labels
 		input_size = trainset[0][0].shape[0] # input dimensions
@@ -70,7 +70,8 @@ def main():
 	
 	# Training
 	if verbose:
-		print('\nStart training {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, device={}'.format(model_name, epochs, prev_epoch, batch_size, lr, device))
+		print('\nStart training {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, save_every={} device={}'\
+									.format(model_name, epochs, prev_epoch, batch_size, lr, save_every, device))
 
 	best_loss, train_acc, val_acc, total_time = fit_model(model,
 														  data, 
@@ -84,7 +85,8 @@ def main():
 														  verbose=verbose)
 
 	if verbose:
-		print('\nTraining finished! \nTime: {:2f}, best train loss: {:5f}, best train acc: {:5f}, best val acc: {:5f}'.format(total_time, best_loss, train_acc, val_acc))
+		print('\nTraining finished! \nTime: {:2f}, (best) train loss: {:5f}, train acc1: {:5f}, train acc5: {:5f}, val acc1: {:5f}, val acc5: {:5f}' \
+														.format(total_time, best_loss, train_acc[0], train_acc[1], val_acc[0], val_acc[1]))
 
 if __name__ == '__main__':
 	main()

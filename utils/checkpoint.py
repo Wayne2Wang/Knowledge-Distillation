@@ -61,5 +61,5 @@ def load_checkpoint(model, optimizer, criterion, path_to_model, verbose=True):
     val_acc = checkpoint['val_acc']
     if verbose:
         print('Loaded checkpoint from {}'.format(path_to_model))
-        print('Previous loss {:5f}, train_acc {:5f}, val_acc {:5f}'.format(best_loss, train_acc, val_acc))
+        print('Previous loss {:5f}, train_acc1 {:5f}, train_acc5 {:5f}, val_acc1 {:5f}, val_acc5 {:5f}'.format(best_loss, train_acc[0], train_acc[1], val_acc[0], val_acc[1]))
     return epoch, best_loss, train_acc, val_acc

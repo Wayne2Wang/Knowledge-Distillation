@@ -103,7 +103,7 @@ def ImageNet1k(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=
         print('Successfully loaded ImageNet from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
     
     # Show a random example
-    if show:
+    if not flat and show:
         rand_int = torch.randint(len(trainset),(1,)).item()
         img, _ = trainset[rand_int] # 3xHxW
         plt.imshow(img.permute(1, 2, 0))
@@ -113,7 +113,7 @@ def ImageNet1k(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=
 
 
 def main():
-    ImageNet1k()
+    ImageNet1k(show=True, flat=False)
 
 if __name__ == '__main__':
     main()

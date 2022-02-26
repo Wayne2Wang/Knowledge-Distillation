@@ -1,11 +1,13 @@
 import time
 import torch
+import torchmetrics
 
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from utils.checkpoint import save_checkpoint
+from eval import eval_acc
 
 class MLP(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
@@ -27,6 +29,7 @@ class MLP(torch.nn.Module):
         output = self.fcs[num-1](output)
         return output
 
+
 def fit_model(
     model,
     data, 
@@ -44,17 +47,21 @@ def fit_model(
     # Read data
     trainset, valset, dataset = data
     train_size = len(trainset)
-    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 4, shuffle = False)
-    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 4, shuffle = True)
+    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 3, shuffle = False)
+    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 3, shuffle = False)
   
     # Start training
     writer = SummaryWriter(log_dir='log\\{}\\{}'.format(dataset, model_name))
     start_time = time.time()
     best_loss = float('inf')
-    best_train_acc = 0
-    best_val_acc = 0
+    best_train_acc1 = 0
+    best_train_acc5 = 0
+    best_val_acc1 = 0
+    best_val_acc5 = 0
     real_epoch = prev_epoch
     model = model.to(device)
+    metric1 = torchmetrics.Accuracy(top_k=1).to(device)
+    metric5 = torchmetrics.Accuracy(top_k=5).to(device)
 
     for epoch in range(epochs):
 
@@ -75,6 +82,10 @@ def fit_model(
             # Compute Loss
             loss = criterion(y_pred, y_batch)
 
+            # Computer train acc
+            metric1.update(y_pred, y_batch)
+            metric5.update(y_pred, y_batch)
+
             # Record loss
             loss_value = loss.item()
             total_loss += loss_value
@@ -85,46 +96,42 @@ def fit_model(
 
         # Evaluate this epoch
         total_loss /= train_size
-        train_acc = 1#utils.eval_model_acc(model,train_loader,num_batch=10, device=device)
-        val_acc = 1#utils.eval_model_acc(model,val_loader,num_batch=10, device=device)
+        train_acc1 = metric1.compute()
+        train_acc5 = metric5.compute()
+        metric1.reset()
+        metric5.reset()
+        val_acc1, val_acc5 = eval_acc(model, val_loader, device) 
 
-        if train_acc > best_train_acc:
-            best_train_acc = train_acc
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-        if total_loss < best_loss:
-            best_loss = total_loss
+        best_train_acc1 = train_acc1 if train_acc1 > best_train_acc1 else best_train_acc1
+        best_train_acc5 = train_acc5 if train_acc5 > best_train_acc5 else best_train_acc5
+        best_val_acc1 = val_acc1 if val_acc1 > best_val_acc1 else best_val_acc1
+        best_val_acc5 = val_acc5 if val_acc5 > best_val_acc5 else best_val_acc5
+        best_loss = total_loss if total_loss < best_loss else best_loss
 
         # log training stats
         writer.add_scalar('Loss/train', total_loss, real_epoch)
-        writer.add_scalar('Accuracy/train', train_acc, real_epoch)
-        writer.add_scalar('Accuracy/val', train_acc, real_epoch)
+        writer.add_scalar('Accuracy1/train', train_acc1, real_epoch)
+        writer.add_scalar('Accuracy5/train', train_acc5, real_epoch)
+        writer.add_scalar('Accuracy1/val', val_acc1, real_epoch)
+        writer.add_scalar('Accuracy5/val', val_acc5, real_epoch)
         
         if verbose:
-            print('train loss {:5f}, train_acc {:5f}, val_acc {:5f}, time {:2f}s'.format(total_loss, train_acc, val_acc, time.time()-start_time))
+            print('train loss {:5f}, train_acc1 {:5f}, train_acc5 {:5f}, val_acc1 {:5f}, val_acc5 {:5f}, time {:2f}s'.format(total_loss, train_acc1, train_acc5, val_acc1, val_acc5, time.time()-start_time))
 
+        train_acc = train_acc1, train_acc5
+        val_acc = val_acc1, val_acc5
         if (epoch+1)%save_every == 0:
             save_checkpoint('{}\\{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
 
 
     if not epochs%save_every == 0:
         save_checkpoint('{}\\{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
+
     total_time = time.time() - start_time
+    best_train_acc = best_train_acc1, best_train_acc5
+    best_val_acc = best_val_acc1, best_val_acc5
 
     return best_loss, best_train_acc, best_val_acc, total_time
             
 
     
-# TODO improve efficiency
-def eval_model_acc(model, data_loader, num_batch=10, device='cpu'):
-    model = model.to(device)
-    model.eval()
-    correct = 0
-    for _ in range(num_batch):
-        batch = next(iter(data_loader))
-        img = batch[0].to(device)
-        label = batch[1].to(device)
-        pred = model(img)
-        correct += torch.sum((label == torch.argmax(pred, dim=1)).float())
-    model.train()
-    return correct/(num_batch*img.shape[0])
