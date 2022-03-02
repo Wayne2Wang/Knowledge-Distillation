@@ -66,7 +66,16 @@ class ImageNet1K_dataset(Dataset):
 
     @staticmethod
     def get_augmentation():
-        # TODO: Implement augmentation for imagenet
+        # note that this only works for Tensor objects
+        augmentation = torch.nn.Sequential(
+                        transforms.RandomAffine(degrees=(-30,30), translate=(0.1,0.1), 
+                                                scale=(0.8,1.2), shear=30, 
+                                                interpolation=transforms.InterpolationMode.BILINEAR
+                                                ), # applies random affine transforoms (actually might be all we need)
+                        transforms.RandomHorizontalFlip(p=0.25), # apply random horizontal flip with probability 0.25
+                        transforms.RandomVerticalFlip(p=0.25),
+                        transforms.RandomPerspective(distortion_scale=0.3, p=0.25) # apply perspective shift with probability 0.25
+                        )
         return None
     
     def __getitem__(self, idx):
