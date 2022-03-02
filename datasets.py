@@ -74,8 +74,8 @@ class ImageNet_dataset(Dataset):
                                                 scale=((1-intensity*0.2),(1+intensity*0.2)), shear=intensity*30, 
                                                 interpolation=transforms.InterpolationMode.BILINEAR
                                                 ), # applies random affine transforoms (actually might be all we need)
-                        transforms.RandomHorizontalFlip(p=0.25), # apply random horizontal flip with probability 0.25
-                        transforms.RandomVerticalFlip(p=0.25),
+                        transforms.RandomHorizontalFlip(p=intensity*0.25), # apply random horizontal flip with probability 0.25*intensity
+                        transforms.RandomVerticalFlip(p=intensity*0.25),
                         transforms.RandomPerspective(distortion_scale=intensity*0.3, p=0.25) # apply perspective shift with probability 0.25
                         )
         return augmentation
