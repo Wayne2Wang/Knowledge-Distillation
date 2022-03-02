@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 class ImageNet_dataset(Dataset):
-    def __init__(self,root, dtype, train=True, flat=True):
+    def __init__(self,root, dtype, train=True, flat=True, intensity=1):
         self.root = root
         self.dtype = dtype
         self.flat = flat
@@ -30,7 +30,7 @@ class ImageNet_dataset(Dataset):
 
         # Transformation and augmentation
         self.transforms = ImageNet_dataset.get_transformation(flat)
-        self.augmentations = ImageNet_dataset.get_augmentation()
+        self.augmentations = ImageNet_dataset.get_augmentation(intensity) # intensity of augmentation. It is advised to keep it between 0 and 2
 
         # Read train/val data and labels
         if train:
@@ -65,16 +65,18 @@ class ImageNet_dataset(Dataset):
         return transform
 
     @staticmethod
-    def get_augmentation():
+    def get_augmentation(intensity=1):
         # note that this only works for Tensor objects
+        # It is advised to keep intensity between 0 and 2
+        assert intensity >= 0, "Intensity should not be negative"
         augmentation = torch.nn.Sequential(
-                        transforms.RandomAffine(degrees=(-30,30), translate=(0.1,0.1), 
-                                                scale=(0.8,1.2), shear=30, 
+                        transforms.RandomAffine(degrees=(intensity*-30,intensity*30), translate=(intensity*0.1,intensity*0.1), 
+                                                scale=((1-intensity*0.2),(1+intensity*0.2)), shear=intensity*30, 
                                                 interpolation=transforms.InterpolationMode.BILINEAR
                                                 ), # applies random affine transforoms (actually might be all we need)
                         transforms.RandomHorizontalFlip(p=0.25), # apply random horizontal flip with probability 0.25
                         transforms.RandomVerticalFlip(p=0.25),
-                        transforms.RandomPerspective(distortion_scale=0.3, p=0.25) # apply perspective shift with probability 0.25
+                        transforms.RandomPerspective(distortion_scale=intensity*0.3, p=0.25) # apply perspective shift with probability 0.25
                         )
         return augmentation
     
