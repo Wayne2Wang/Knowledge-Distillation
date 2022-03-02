@@ -4,7 +4,7 @@ import torchvision
 import torchmetrics
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from datasets import ImageNet1k
+from datasets import ImageNet
 
 """
 A script to evaluate the accuracy of the pretrained resnets (to be extended to other models)
@@ -55,8 +55,8 @@ def main():
     num_batches = 3
     verbose = True # number of batches to run evaluation, set to inf to run on the whole dataset
 
-
-    trainset, valset = ImageNet1k(flat=False)
+    dataset = 'ImageNet64'
+    trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False)
     model = torchvision.models.resnet50(pretrained=True).to(device)
     train_loader = DataLoader(trainset, batch_size = 128, num_workers = 3, shuffle = False)
     val_loader = DataLoader(valset, batch_size = 128, num_workers = 3, shuffle = False)

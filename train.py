@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from torchsummary import summary
-from datasets import ImageNet1k
+from datasets import ImageNet
 from utils.checkpoint import load_checkpoint
 from models import MLP, fit_model
 import argparse
@@ -43,13 +43,16 @@ def main():
 
 	# Read data
 	if dataset == 'ImageNet1k':	
-		trainset, valset = ImageNet1k(flat=(not resnet),verbose=verbose)
-		data = trainset, valset, dataset
+		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=(not resnet),verbose=verbose)
 		output_size = 1000 # number of distinct labels
-		input_size = trainset[0][0].shape[0] # input dimensions
+	elif dataset == 'ImageNet64':	
+		trainset, valset = ImageNet(root='data/ImageNet64/',flat=(not resnet),verbose=verbose)
+		output_size = 1000 # number of distinct labels
 	else:
 		raise Exception(dataset+' dataset not supported!')
-
+	data = trainset, valset, dataset
+	input_size = trainset[0][0].shape[0] # input dimensions
+	
 	# Model initialization
 	if resnet:
 		model = torchvision.models.resnet18(pretrained=True)

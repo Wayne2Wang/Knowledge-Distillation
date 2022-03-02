@@ -10,7 +10,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-class ImageNet1K_dataset(Dataset):
+class ImageNet_dataset(Dataset):
     def __init__(self,root, dtype, train=True, flat=True):
         self.root = root
         self.dtype = dtype
@@ -29,8 +29,8 @@ class ImageNet1K_dataset(Dataset):
 
 
         # Transformation and augmentation
-        self.transforms = ImageNet1K_dataset.get_transformation(flat)
-        self.augmentations = ImageNet1K_dataset.get_augmentation()
+        self.transforms = ImageNet_dataset.get_transformation(flat)
+        self.augmentations = ImageNet_dataset.get_augmentation()
 
         # Read train/val data and labels
         if train:
@@ -51,8 +51,8 @@ class ImageNet1K_dataset(Dataset):
     @staticmethod
     def get_transformation(flat):
         if flat:
-            resize = 36
-            center = 32
+            resize = 72
+            center = 64
         else:
             resize = 256
             center = 224
@@ -95,9 +95,9 @@ class ImageNet1K_dataset(Dataset):
         return self.ImageSet.shape[0]
 
 
-def ImageNet1k(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False):
-    trainset = ImageNet1K_dataset(root=root, train=True, dtype=dtype, flat=flat)
-    valset = ImageNet1K_dataset(root=root, train=False, dtype=dtype, flat=flat)
+def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False):
+    trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat)
+    valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat)
 
     if verbose:
         print('Successfully loaded ImageNet from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
@@ -113,7 +113,7 @@ def ImageNet1k(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=
 
 
 def main():
-    ImageNet1k(show=True, flat=False)
+    ImageNet(root='data/ImageNet64/',show=True, flat=False)
 
 if __name__ == '__main__':
     main()
