@@ -1,14 +1,18 @@
 # Knowledge-Distillation
 
 **TODO**: 
-- [ ] Implement more efficient dataloader(FFCV/WebDataset/ImageFolder/Nvidia DALI): FFCV is the first option but it works only on Linux.
-- [ ] Implement image augmentation in dataset.py
+- [ ] Implement more efficient dataloader(FFCV/WebDataset/ImageFolder/Nvidia DALI): FFCV is the first option but it works only on Linux
+- [ ] Improve MLP model(Dropout etc.) and tune the hyperparameter for MLP training
+- [ ] Set up Knowledge Distillation pipeline (generic enough to take different teachers and students)
+- [ ] Extend eval.py to evaluate any models
+- [ ] Implement image augmentation in datasest.py
+- [ ] If needed, implement more dataset classes
 - [ ] If needed, deploy to Great Lakes
 
 
 To train the models on ImageNet: 
 
-1. download ImageNet1K 2012
+1. download ImageNet1k(ILSVRC2012) to root/data/ImageNet1k
 2. copy val_labels.txt and train_labels.txt into the ImageSet folder
 
 
