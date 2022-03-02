@@ -76,7 +76,7 @@ class ImageNet1K_dataset(Dataset):
                         transforms.RandomVerticalFlip(p=0.25),
                         transforms.RandomPerspective(distortion_scale=0.3, p=0.25) # apply perspective shift with probability 0.25
                         )
-        return None
+        return augmentation
     
     def __getitem__(self, idx):
         # Read image and label
