@@ -61,7 +61,7 @@ def main():
     verbose = True # number of batches to run evaluation, set to inf to run on the whole dataset
 
     dataset = 'ImageNet64'
-    trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False)
+    trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
     model = torchvision.models.resnet50(pretrained=True).to(device)
     # upscaler
     #model = ModelUpscaler(model, 224)
