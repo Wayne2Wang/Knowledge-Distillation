@@ -11,12 +11,14 @@ import matplotlib.pyplot as plt
 
 
 class ImageNet_dataset(Dataset):
-    def __init__(self,root, dtype, train=True, flat=True, intensity=1):
+    def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False):
         self.root = root
         self.dtype = dtype
         self.flat = flat
         self.train = train
-
+        # upscale -> upscales image dimension to a specified size
+        self.upscale = upscale
+        
         # file directories
         # label: 0, name: n01440764, name_readable: tench
         train_imageset = root+'ILSVRC/ImageSets/CLS-LOC/train_cls.txt'
@@ -93,7 +95,10 @@ class ImageNet_dataset(Dataset):
         # Perform transformation and augmentation
         if self.transforms:
             img = self.transforms(img)
-        #if self.augmentations:
+        if self.upscale:
+            upscaler = torch.nn.Upsample((self.upscale, self.upscale))
+            img = upscaler(img)
+        #if self.augmentations and not self.train:
             #img = self.augmentations(img)
 
         # flatten
