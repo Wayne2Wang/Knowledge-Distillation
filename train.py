@@ -55,7 +55,7 @@ def main():
 	
 	# Model initialization
 	if resnet:
-		model = torchvision.models.resnet18(pretrained=True)
+		model = torchvision.models.resnet50(pretrained=True)
 	else:
 		model = MLP(input_size, hidden_sizes, output_size)
 		summary(model, (1,input_size), device='cpu')

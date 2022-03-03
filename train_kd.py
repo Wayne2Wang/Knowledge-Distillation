@@ -194,7 +194,7 @@ def main():
 	input_size = trainset[0][0].reshape(-1).shape[0] # input dimensions
 	
 	# Model initialization for teacher
-	teacherModel = torchvision.models.resnet18(pretrained=True)
+	teacherModel = torchvision.models.resnet50(pretrained=True)
 	model_name_teacher = type(teacherModel).__name__
 	#teacherModel = ModelUpscaler(teacherModel, 224)
 
