@@ -11,13 +11,14 @@ import matplotlib.pyplot as plt
 
 
 class ImageNet_dataset(Dataset):
-    def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False):
+    def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False, evalmode=False):
         self.root = root
         self.dtype = dtype
         self.flat = flat
         self.train = train
         # upscale -> upscales image dimension to a specified size
         self.upscale = upscale
+        self.evalmode = evalmode
         
         # file directories
         # label: 0, name: n01440764, name_readable: tench
@@ -98,8 +99,8 @@ class ImageNet_dataset(Dataset):
         if self.upscale:
             upscaler = torch.nn.Upsample((self.upscale, self.upscale))
             img = upscaler(img)
-        #if self.augmentations and not self.train:
-            #img = self.augmentations(img)
+        if self.augmentations and self.evalmode:
+            img = self.augmentations(img)
 
         # flatten
         if self.flat:
@@ -115,9 +116,9 @@ class ImageNet_dataset(Dataset):
         return self.ImageSet.shape[0]
 
 
-def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False):
-    trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat)
-    valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat)
+def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False):
+    trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode)
+    valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode)
 
     if verbose:
         print('Successfully loaded ImageNet from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
