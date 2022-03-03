@@ -29,7 +29,7 @@ class ImageNet_dataset(Dataset):
 
 
         # Transformation and augmentation
-        self.transforms = ImageNet_dataset.get_transformation(flat)
+        self.transforms = ImageNet_dataset.get_transformation(root)
         self.augmentations = ImageNet_dataset.get_augmentation(intensity) # intensity of augmentation. It is advised to keep it between 0 and 2
 
         # Read train/val data and labels
@@ -49,19 +49,22 @@ class ImageNet_dataset(Dataset):
         self.names_readable = ast.literal_eval(dict)
 
     @staticmethod
-    def get_transformation(flat):
-        if flat:
-            resize = 72
-            center = 64
-        else:
-            resize = 256
-            center = 224
-        transform = transforms.Compose([
-                        transforms.Resize(resize),
-                        transforms.CenterCrop(center),
+    def get_transformation(root):
+        if root.endswith('ImageNet1k/'):
+            transform = transforms.Compose([
+                        transforms.Resize(256),
+                        transforms.CenterCrop(224),
                         transforms.ToTensor(),
                         transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
                                             std = [ 0.229, 0.224, 0.225 ])])
+        elif root.endswith('ImageNet64/'):
+            # mean and std calculated on Imagenet64
+            transform = transforms.Compose([
+                        transforms.CenterCrop(64),
+                        transforms.ToTensor(),
+                        transforms.Normalize(mean = [0.4850, 0.4581, 0.4073],
+                                            std = [0.2639, 0.2560, 0.2703])])
+        
         return transform
 
     @staticmethod
