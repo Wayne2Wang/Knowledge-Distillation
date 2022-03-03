@@ -38,7 +38,11 @@ def eval_acc(model, data_loader, device, num_batches=None, verbose=False, mode='
         with torch.no_grad():
             x_batch = batch[0].to(device)
             y_batch = batch[1].to(device)
-            preds_onehot = model(x_batch)
+            if type(model).__name__ == 'MLP':
+                # flat for MLPs
+                preds_onehot = model(x_batch.reshape(x_batch.shape[0],-1))
+            else:
+                preds_onehot = model(x_batch)
             metric1.update(preds_onehot, y_batch)
             metric5.update(preds_onehot, y_batch)
     acc1 = metric1.compute()

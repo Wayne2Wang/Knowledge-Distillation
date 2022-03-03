@@ -1,14 +1,16 @@
 import torch
 import torchvision
-import tqdm
+from tqdm import tqdm
 from torchsummary import summary
 from datasets import ImageNet
-from utils.checkpoint import load_checkpoint
-from models import MLP, fit_model
+from utils.checkpoint import load_checkpoint, save_checkpoint
+from models import MLP
 import argparse
 from eval import eval_acc
 from torch.utils.data import DataLoader
 import torchmetrics
+from torch.utils.tensorboard import SummaryWriter
+import time
 
 
 def parse_arg():
@@ -24,6 +26,8 @@ def parse_arg():
 	parser.add_argument('--bs', type=int, default=128, help='Batch size')
 	parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
 	parser.add_argument("--hs",  nargs="*",  type=int, default=[2000, 1000, 100], help='Hidden units')
+	parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
+	parser.add_argument('--temp', type=float, default=7, help='temperature')
 	parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
 	# add arg for student and teacher model
 	args = parser.parse_args()
@@ -32,21 +36,42 @@ def parse_arg():
 
 def train_kd(teacherModel,
             studentModel,
+			data,
 			optimizerStudent,
 			student_loss,
 			divergence_loss,
 			temp,
 			alpha,
-			device,
-			data_loader,
-            prev_epoch,
             train_size,
+			prev_epoch,
             epochs = 10,  
             batch_size = 64, 
             save_every = 5,
             verbose = False,
+			device='cpu'
             ):
+
+    # Read data
+    trainset, valset, dataset = data
+    train_size = len(trainset)
+    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 3, shuffle = False)
+    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 3, shuffle = False)
+    model_name_student = type(studentModel).__name__
+    model_name_teacher = type(teacherModel).__name__
     
+
+    writer = SummaryWriter(log_dir='log\\{}\\{}_{}'.format(dataset, model_name_student, model_name_teacher))
+    start_time = time.time()
+    best_loss = float('inf')
+    best_train_acc1 = 0
+    best_train_acc5 = 0
+    best_val_acc1 = 0
+    best_val_acc5 = 0
+    real_epoch = prev_epoch
+    studentModel = studentModel.to(device)
+    teacherModel=teacherModel.to(device)
+    metric1 = torchmetrics.Accuracy(top_k=1).to(device)
+    metric5 = torchmetrics.Accuracy(top_k=5).to(device)
     for epoch in range(epochs):
 
         total_loss = 0
@@ -55,16 +80,11 @@ def train_kd(teacherModel,
         studentModel.train()
         teacherModel.eval()
         
-        for batch in tqdm(data_loader, ascii=True, desc='Epoch {}/{}'.format(real_epoch, prev_epoch+epochs)):
+        for batch in tqdm(train_loader, ascii=True, desc='Epoch {}/{}'.format(real_epoch, prev_epoch+epochs)):
         
             # Prepare minibatch
             x_batch = batch[0].to(device)
             y_batch = batch[1].to(device)
-
-            real_epoch = prev_epoch
-            model = model.to(device)
-            metric1 = torchmetrics.Accuracy(top_k=1).to(device)
-            metric5 = torchmetrics.Accuracy(top_k=5).to(device)
             
             # clear gradient
             optimizerStudent.zero_grad()
@@ -73,11 +93,11 @@ def train_kd(teacherModel,
             with torch.no_grad():
                 teacher_preds = teacherModel(x_batch)
 
-            student_preds = studentModel(x_batch)
-            student_loss = student_loss(student_preds, y_batch)
-                
+            student_preds = studentModel(x_batch.reshape(x_batch.shape[0],-1))
+            student_loss_value = student_loss(student_preds, y_batch)
+            
             distillation_loss = divergence_loss(
-                torch.nn.functional.softmax(student_preds / temp, dim=1),
+                torch.nn.functional.log_softmax(student_preds / temp, dim=1),
                 torch.nn.functional.softmax(teacher_preds / temp, dim=1)
             )
 
@@ -86,7 +106,7 @@ def train_kd(teacherModel,
             metric5.update(student_preds, y_batch)
 
             # Record loss   
-            loss = alpha * student_loss + (1 - alpha) * distillation_loss
+            loss = alpha * student_loss_value + (1 - alpha) * (temp**2) *distillation_loss
             loss_value = loss.item()
             total_loss += loss_value
 
@@ -96,16 +116,47 @@ def train_kd(teacherModel,
 
             optimizerStudent.step()
 
-            # Evaluate this epoch
-            total_loss /= train_size
-            train_acc1 = metric1.compute()
-            train_acc5 = metric5.compute()
-            metric1.reset()
-            metric5.reset()
-            best_train_acc1 = train_acc1 if train_acc1 > best_train_acc1 else best_train_acc1
-            best_train_acc5 = train_acc5 if train_acc5 > best_train_acc5 else best_train_acc5
+        # Evaluate this epoch
+        total_loss /= train_size
+        train_acc1 = metric1.compute()
+        train_acc5 = metric5.compute()
+        metric1.reset()
+        metric5.reset()
+        val_acc1, val_acc5 = eval_acc(studentModel, val_loader, device) 
+
+		# update stats
+        best_train_acc1 = train_acc1 if train_acc1 > best_train_acc1 else best_train_acc1
+        best_train_acc5 = train_acc5 if train_acc5 > best_train_acc5 else best_train_acc5
+        best_val_acc1 = val_acc1 if val_acc1 > best_val_acc1 else best_val_acc1
+        best_val_acc5 = val_acc5 if val_acc5 > best_val_acc5 else best_val_acc5
+        best_loss = total_loss if total_loss < best_loss else best_loss
+
+        # log training stats
+        writer.add_scalar('Loss/train', total_loss, real_epoch)
+        writer.add_scalar('Accuracy1/train', train_acc1, real_epoch)
+        writer.add_scalar('Accuracy5/train', train_acc5, real_epoch)
+        writer.add_scalar('Accuracy1/val', val_acc1, real_epoch)
+        writer.add_scalar('Accuracy5/val', val_acc5, real_epoch)
+
+        if verbose:
+            print('train loss {:5f}, train_acc1 {:5f}, train_acc5 {:5f}, val_acc1 {:5f}, val_acc5 {:5f}, time {:2f}s'.format(total_loss, train_acc1, train_acc5, val_acc1, val_acc5, time.time()-start_time))
+
+        train_acc = train_acc1, train_acc5
+        val_acc = val_acc1, val_acc5
+        if (epoch+1)%save_every == 0:
+            save_checkpoint('{}\\{}_{}_{}.pt'.format(dataset, model_name_student, model_name_teacher, real_epoch),studentModel, real_epoch,\
+			 optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
+
+
+    if not epochs%save_every == 0:
+        save_checkpoint('{}\\{}_{}_{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
+			 optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
+
+    total_time = time.time() - start_time
+    best_train_acc = best_train_acc1, best_train_acc5
+    best_val_acc = best_val_acc1, best_val_acc5
     
-    return train_acc1, train_acc5
+    return best_loss, best_train_acc, best_val_acc, total_time
 
 
 
@@ -117,104 +168,82 @@ def main():
 	verbose = True #args.verbose
 	dataset = args.dataset
 	save_every = args.save_every
-	resnet = args.resnet
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
+	device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 	# Hyperparameters
 	epochs = args.epochs
 	batch_size = args.bs
 	lr = args.lr
 	hidden_sizes = args.hs
-	temp = 7
-	alpha = 0.3
+	temp = args.temp
+	alpha = args.alpha
 
 	# Read data
 	if dataset == 'ImageNet1k':	
-		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=(not resnet),verbose=verbose)
+		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=False,verbose=verbose)
 		output_size = 1000 # number of distinct labels
 	elif dataset == 'ImageNet64':	
-		trainset, valset = ImageNet(root='data/ImageNet64/',flat=(not resnet),verbose=verbose)
+		trainset, valset = ImageNet(root='data/ImageNet64/',flat=False,verbose=verbose)
 		output_size = 1000 # number of distinct labels
 	else:
 		raise Exception(dataset+' dataset not supported!')
-	data = trainset, valset, dataset
-	input_size = trainset[0][0].shape[0] # input dimensions
 
-	trainset, valset, dataset = data
 	train_size = len(trainset)
-	train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 3, shuffle = False)
-	val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 3, shuffle = False)
+	data = trainset, valset, dataset
+	input_size = trainset[0][0].reshape(-1).shape[0] # input dimensions
 	
 	# Model initialization for teacher
-	if resnet:
-		teacherModel = torchvision.models.resnet18(pretrained=True)
-	else:
-		teacherModel = MLP(input_size, hidden_sizes, output_size)
-		summary(teacherModel, (1,input_size), device='cpu')
-	model_name = type(teacherModel).__name__
-	teacherModel = teacherModel.to(device) # avoid different device error when resuming training
-	prev_epoch = 0
-	optimizer = torch.optim.AdamW(teacherModel.parameters(), lr=lr)
-	criterion = torch.nn.CrossEntropyLoss()
+	teacherModel = torchvision.models.resnet18(pretrained=True)
+	model_name_teacher = type(teacherModel).__name__
 
 
 	# Model initialization for student
-	studentModel = MLP(input_size, hidden_sizes / 3, output_size)
-	summary(studentModel, (1,input_size), device='cpu')
-	
-	model_name_student = type(studentModel).__name__
+	studentModel = MLP(input_size, hidden_sizes, output_size)
 	studentModel = studentModel.to(device) # avoid different device error when resuming training
+	model_name_student = type(studentModel).__name__
+	summary(studentModel, (1,input_size), device=device_name)
+	
 	prev_epoch = 0
 	optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr)
 	student_loss = torch.nn.CrossEntropyLoss()
 	divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
-	optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr)
-
 
 	# Load previously trained model if specified
 	if not load_model == '':
-		prev_epoch, _, _, _ = load_checkpoint(teacherModel, optimizer, criterion, load_model, verbose)
+		prev_epoch, _, _, _ = load_checkpoint(studentModel, optimizerStudent, student_loss, load_model, verbose)
 
 	
 	# Training
 	if verbose:
-		print('\nStart training {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, save_every={} device={}'\
-									.format(model_name, epochs, prev_epoch, batch_size, lr, save_every, device))
+		print('\nStart training {} from teacher {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, alpha={}, temp={}, save_every={} device={}'\
+									.format(model_name_student, model_name_teacher, epochs, prev_epoch, batch_size, lr, alpha, temp, save_every, device))
 
-	# Train teacher Model
-
-	best_loss, train_acc, val_acc, total_time = fit_model(teacherModel,
-														  data, 
-														  optimizer,
-														  criterion,
-														  device=device,
-														  prev_epoch=prev_epoch,
-														  epochs=epochs,  
-														  batch_size=batch_size, 
-														  save_every=save_every,
-														  verbose=verbose)
 	
+
+	# Train student model with soft labels from parent
+	best_loss, train_acc, val_acc, total_time = train_kd(teacherModel,
+									studentModel,
+									data,
+									optimizerStudent,
+									student_loss,
+									divergence_loss,
+									temp,
+									alpha,
+									train_size,
+									prev_epoch,
+									epochs = epochs,
+									batch_size=batch_size,
+									save_every=save_every,
+									device = device,
+									verbose = verbose
+									)
 
 	if verbose:
 		print('\nTraining finished! \nTime: {:2f}, (best) train loss: {:5f}, train acc1: {:5f}, train acc5: {:5f}, val acc1: {:5f}, val acc5: {:5f}' \
 														.format(total_time, best_loss, train_acc[0], train_acc[1], val_acc[0], val_acc[1]))
-
-	# Train student model with soft labels from parent
-	train_acc1, train_acc5 = train_kd(teacherModel,
-									studentModel,
-									optimizerStudent,
-									student_loss,
-									divergence_loss,
-									temp = temp,
-									alpha = alpha,
-									epochs = epochs,
-									device = device,
-									data_loader = train_loader,
-									prev_epoch=prev_epoch,
-									train_size=train_size)
 	
-	# Evaluate accuracy of student model
-	eval_acc(studentModel, val_loader, device, num_batches=None, verbose=False, mode='validation')										
+									
 
 if __name__ == '__main__':
 	main()

@@ -34,11 +34,11 @@ class ImageNet_dataset(Dataset):
 
         # Read train/val data and labels
         if train:
-            self.ImageSet = pd.read_csv(train_imageset, delimiter=' ', header=None)
+            self.ImageSet = pd.read_csv(train_imageset, delimiter=' ', header=None).iloc[0:1000,:]
             self.image_dir = train_image_dir
             self.labels = pd.read_csv(train_labels_dir, delimiter=' ', header=None).to_numpy().reshape(-1)
         else:
-            self.ImageSet = pd.read_csv(val_imageset, delimiter=' ', header=None)
+            self.ImageSet = pd.read_csv(val_imageset, delimiter=' ', header=None).iloc[0:1000,:]
             self.image_dir = val_image_dir
             self.labels = pd.read_csv(val_labels_dir, delimiter=' ', header=None).to_numpy().reshape(-1)
 
@@ -64,7 +64,8 @@ class ImageNet_dataset(Dataset):
                         transforms.ToTensor(),
                         transforms.Normalize(mean = [0.4850, 0.4581, 0.4073],
                                             std = [0.2639, 0.2560, 0.2703])])
-        
+        else:
+            raise Exception(root+' dataset not supported!')
         return transform
 
     @staticmethod
