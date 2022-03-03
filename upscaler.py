@@ -2,6 +2,8 @@ import torch
 
 class ModelUpscaler(torch.nn.Module):
     def __init__(self, model, upscale):
+        # model: model to upscale
+        # upscale: which spatial dimension we want to upscale it to
         super(ModelUpscaler, self).__init__()
         self.model = model
         self.upscale = upscale
