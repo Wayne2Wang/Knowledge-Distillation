@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
 import time
-from upscaler import ModelUpscaler
+from utils.upscaler import ModelUpscaler
 
 
 def parse_arg():

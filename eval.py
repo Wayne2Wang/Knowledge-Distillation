@@ -5,7 +5,7 @@ import torchmetrics
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datasets import ImageNet
-from upscaler import ModelUpscaler
+from utils.upscaler import ModelUpscaler
 
 """
 A script to evaluate the accuracy of the pretrained resnets (to be extended to other models)
