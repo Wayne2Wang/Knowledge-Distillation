@@ -92,8 +92,8 @@ class ImageNet_dataset(Dataset):
         # Perform transformation and augmentation
         if self.transforms:
             img = self.transforms(img)
-        if self.augmentations:
-            img = self.augmentations(img)
+        #if self.augmentations:
+            #img = self.augmentations(img)
 
         # flatten
         if self.flat:

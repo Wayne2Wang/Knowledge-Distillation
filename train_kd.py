@@ -6,7 +6,6 @@ from datasets import ImageNet
 from utils.checkpoint import load_checkpoint
 from models import MLP, fit_model
 import argparse
-from train_kd import train_kd
 from eval import eval_acc
 from torch.utils.data import DataLoader
 import torchmetrics
