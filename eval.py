@@ -5,6 +5,7 @@ import torchmetrics
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datasets import ImageNet
+from upscaler import ModelUpscaler
 
 """
 A script to evaluate the accuracy of the pretrained resnets (to be extended to other models)
@@ -56,12 +57,14 @@ def eval_acc(model, data_loader, device, num_batches=None, verbose=False, mode='
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
-    num_batches = 3
+    num_batches = 1000
     verbose = True # number of batches to run evaluation, set to inf to run on the whole dataset
 
     dataset = 'ImageNet64'
     trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False)
     model = torchvision.models.resnet50(pretrained=True).to(device)
+    # upscaler
+    #model = ModelUpscaler(model, 224)
     train_loader = DataLoader(trainset, batch_size = 128, num_workers = 3, shuffle = False)
     val_loader = DataLoader(valset, batch_size = 128, num_workers = 3, shuffle = False)
     print('Model = {}'.format(type(model).__name__))

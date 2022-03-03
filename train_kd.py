@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
 import time
+from upscaler import ModelUpscaler
 
 
 def parse_arg():
@@ -160,7 +161,6 @@ def train_kd(teacherModel,
 
 
 
-
 def main():
 	# Read the arguments
 	args = parse_arg()
@@ -196,6 +196,7 @@ def main():
 	# Model initialization for teacher
 	teacherModel = torchvision.models.resnet18(pretrained=True)
 	model_name_teacher = type(teacherModel).__name__
+	#teacherModel = ModelUpscaler(teacherModel, 224)
 
 
 	# Model initialization for student
