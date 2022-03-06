@@ -13,6 +13,8 @@ from torch.utils.tensorboard import SummaryWriter
 import time
 from utils.upscaler import ModelUpscaler
 
+from experiment.design_JP import * # call your models here
+
 
 def parse_arg():
     """
@@ -35,7 +37,7 @@ def parse_arg():
     parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
     
     parser.add_argument('--root', default='data/ImageNet64', help='Set root of dataset')
-    parser.add_argument('--reg', default=False, help="Specify which normalization you want to use (l1, l2)")
+    parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
     
     
     
@@ -193,6 +195,7 @@ def main():
     hidden_sizes = args.hs
     temp = args.temp
     alpha = args.alpha
+    regstr = args.reg
 
     # Read data
     if dataset == 'ImageNet1k':    
@@ -227,7 +230,7 @@ def main():
     summary(studentModel, (1,) + tuple(input_size), device=device_name)
     
     prev_epoch = 0
-    optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr)
+    optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr, weight_decay=regstr)
     student_loss = torch.nn.CrossEntropyLoss()
     divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
 
