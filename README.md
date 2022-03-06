@@ -9,6 +9,8 @@
 - [ ] If needed, implement more dataset classes
 - [ ] If needed, deploy to Great Lakes
 
+List of pretrained CIFAR Models (by chenyaofo):
+https://github.com/chenyaofo/pytorch-cifar-models
 
 To train the models on ImageNet: 
 
