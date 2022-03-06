@@ -20,12 +20,6 @@ class MLP(torch.nn.Module):
         
         sizes = [self.input_size] + hidden_sizes + [output_size]
         
-        print(input_size)
-        print(self.input_size)
-        print(sizes[0])
-        print(sizes[1])
-        print(sizes[2])
-        
         self.fcs = torch.nn.ModuleList([torch.nn.Linear(sizes[i], sizes[i+1]) for i in range(len(sizes)-1)])
         self.relu = torch.nn.ReLU()
 
