@@ -117,13 +117,14 @@ class ImageNet_dataset(Dataset):
 
 class ImageNet_Pickle(torch.utils.data.IterableDataset):
     def __init__(self, root, dtype, train=True, flat=False, intensity=1, imgsize=64, dataAug=False):
+        super(ImageNet_Pickle).__init__()
         self.root = root # root to dataset
         self.dtype = dtype
         self.train = train
         self.flat = flat
         self.imgsize = imgsize # imgsize (H == W)
         self.dataAug = dataAug
-        self.dataLen = -1 # placeholder for length
+        self.dataLen = -1 # placeholder for 
 
         # Transformation and augmentation
         self.transforms = ImageNet_Pickle.get_transformation(dtype)
@@ -154,8 +155,8 @@ class ImageNet_Pickle(torch.utils.data.IterableDataset):
     def __iter__(self):
         ## Generator-style dataloader
         worker_info = torch.utils.data.get_worker_info()
-        if worker_info is None or worker_info.num_workers != len(self.paths):
-           raise ValueError("Number of workers doesn't match number of files.")  
+        #if worker_info is None or worker_info.num_workers != len(self.paths):
+        #   raise ValueError("Number of workers doesn't match number of files.")  
         yield from self.read_data() # call sub-generator
     
     def __len__(self):
@@ -202,29 +203,32 @@ class ImageNet_Pickle(torch.utils.data.IterableDataset):
         # Processes and normalizes image data
         ImageSet = dataset['data']
         labels = np.array(dataset['labels'])
-        meanImg = dataset['mean']
-        meanImg /= np.float32(255)
+        if self.train:
+            meanImg = dataset['mean']
+            meanImg /= np.float32(255)
         
         for j in range(ImageSet.shape[0]):
             # Read current image and label
             img = ImageSet[j]
             label = labels[j]-1 # 1-indexing to 0-indexing
+            label = torch.as_tensor(label, dtype=torch.long) # <---- Here (casting)
             
             # Normalize
             img = img / np.float32(255)
-            img -= meanImg
+            if self.train:
+                img -= meanImg
             
             # Reshape
             if not self.flat:
               img = img.reshape(3, self.imgsize, self.imgsize) #(3, 64, 64) if default
-              
             # Perform transformation and augmentation
             if self.transforms:
-                img = self.transforms(img)
+                img = torch.as_tensor(img, dtype=self.dtype)
+                #img = img.permute(1,2,0)
             if self.augmentations and self.dataAug:
                 img = self.augmentations(img)
                 
-            yield zip(img, label)
+            yield img, label
         
 
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, 
@@ -248,12 +252,11 @@ def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32,
         img, _ = trainset[rand_int] # 3xHxW
         plt.imshow(img.permute(1, 2, 0))
         plt.show()
-
     return trainset, valset
 
 
 def main():
-    ImageNet(root='data/ImageNet64/',show=True, flat=False)
+    ImageNet(root='D:\Research\Dataset\ImageNet64\Imagenet64_batch',show=True, flat=False)
 
 if __name__ == '__main__':
     main()
