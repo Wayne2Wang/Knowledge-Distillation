@@ -31,6 +31,10 @@ Train KD example arguments
 ```
 train_kd.py --stdmodel MLP --tchmodel cifar10_resnet20 --lr 1e-3 --bs 128 --dataset CIFAR10 --verbose --epochs 10 --root "D:/Research/Dataset/CIFAR10"
 ```
+Evaluate example arguments
+```
+--modelpath log/CIFAR10/MLP_drop_CifarResNet_1_model_KD.pt --augment --dataset CIFAR10 --root "G:/My Drive/DL Data/"
+```
 
 To train the MLP, run
 ```
