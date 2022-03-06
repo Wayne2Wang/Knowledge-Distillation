@@ -6,6 +6,7 @@ from utils.checkpoint import load_checkpoint
 from models import MLP, fit_model
 import argparse
 
+from experiment.design_JP import * # call your models here
 
 def parse_arg():
     """
@@ -26,7 +27,7 @@ def parse_arg():
     parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
     ### added below lines
     parser.add_argument('--root', default='data/ImageNet64', help='Set root of dataset')
-    parser.add_argument('--reg', default=False, help="Specify which normalization you want to use (l1, l2)")
+    parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
     args = parser.parse_args()
     return args
 
@@ -50,6 +51,7 @@ def main():
     batch_size = args.bs
     lr = args.lr
     hidden_sizes = args.hs
+    regstr = args.reg
 
     # Read data
     if dataset == 'ImageNet1k':    
@@ -91,7 +93,7 @@ def main():
     model_name = type(model).__name__
     model = model.to(device) # avoid different device error when resuming training
     prev_epoch = 0
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.001)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=regstr)
     criterion = torch.nn.CrossEntropyLoss()
     
     """
