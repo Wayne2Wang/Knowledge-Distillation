@@ -1,5 +1,7 @@
 # Knowledge-Distillation
 
+## Modified version to accept ImageNet64 downsampled data (Directly from the web)
+
 **TODO**: 
 - [ ] Implement more efficient dataloader(FFCV/WebDataset/ImageFolder/Nvidia DALI): FFCV is the first option but it works only on Linux
 - [ ] Improve MLP model(Dropout etc.) and tune the hyperparameter for MLP training
