@@ -19,8 +19,9 @@ def parse_arg():
     Parse the command line arguments
     """
     parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
-    parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
-    parser.add_argument('--model', type=str, default='MLP', help='Name of the model you\'re going to train')
+    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    parser.add_argument('--stdmodel', type=str, default='MLP', help='Name of the student model you\'re going to train')
+    parser.add_argument('--tchmodel', type=str, default='cifar10_resnet20', help='Name of the teacher model you\'re going to use')
     
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
     parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
@@ -177,8 +178,9 @@ def main():
     dataset = args.dataset
     save_every = args.save_every
     
-    modelname = args.model
-    modelmethod = globals()[modelname] # call function with 'modelname' name
+    student_name = args.stdmodel
+    teacher_name = args.tchmodel
+    std_model_method = globals()[student_name] # call function with 'modelname' name
     
     root = args.root
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
@@ -213,13 +215,13 @@ def main():
     
     # Model initialization for teacher
     #teacherModel = torchvision.models.resnet50(pretrained=True)
-    teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", "cifar10_resnet20", pretrained=True)
+    teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
     model_name_teacher = type(teacherModel).__name__
     #teacherModel = ModelUpscaler(teacherModel, 224)
 
 
     # Model initialization for student
-    studentModel = MLP(input_size, hidden_sizes, output_size)
+    studentModel = std_model_method(input_size, hidden_sizes, output_size)
     studentModel = studentModel.to(device) # avoid different device error when resuming training
     model_name_student = type(studentModel).__name__
     summary(studentModel, (1,) + tuple(input_size), device=device_name)
