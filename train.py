@@ -43,10 +43,10 @@ def main():
 
 	# Read data
 	if dataset == 'ImageNet1k':	
-		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=(not resnet),verbose=verbose)
+		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=(not resnet),verbose=verbose, img_generator=False)
 		output_size = 1000 # number of distinct labels
 	elif dataset == 'ImageNet64':	
-		trainset, valset = ImageNet(root='data/Imagenet64/',flat=(not resnet),verbose=verbose) # batch files
+		trainset, valset = ImageNet(root='data/Imagenet64/',flat=(not resnet),verbose=verbose, img_generator=True, imgsize=64) # batch files
 		output_size = 1000 # number of distinct labels
 	else:
 		raise Exception(dataset+' dataset not supported!')
