@@ -54,7 +54,7 @@ def fit_model(
     val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 4, shuffle = False)
   
     # Start training
-    writer = SummaryWriter(log_dir='log\\{}\\{}'.format(dataset, model_name))
+    writer = SummaryWriter(log_dir='log/{}/{}'.format(dataset, model_name))
     start_time = time.time()
     best_loss = float('inf')
     best_train_acc1 = 0
@@ -124,11 +124,11 @@ def fit_model(
         train_acc = train_acc1, train_acc5
         val_acc = val_acc1, val_acc5
         if (epoch+1)%save_every == 0:
-            save_checkpoint('{}\\{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
+            save_checkpoint('{}/{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
 
 
     if not epochs%save_every == 0:
-        save_checkpoint('{}\\{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
+        save_checkpoint('{}/{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
 
     ### Save whole model (no need to redefine it -- for evaluation purposes)
     torch.save(model, 'log/{}/{}_{}_model.pt'.format(dataset, model_name, real_epoch))
