@@ -16,7 +16,7 @@ class MLP(torch.nn.Module):
         self.hidden_sizes  = hidden_sizes
         self.output_size = output_size
 
-        sizes = [input_size] + hidden_sizes + [output_size]
+        sizes = list(input_size) + hidden_sizes + [output_size]
         self.fcs = torch.nn.ModuleList([torch.nn.Linear(sizes[i], sizes[i+1]) for i in range(len(sizes)-1)])
         self.relu = torch.nn.ReLU()
 
@@ -47,8 +47,8 @@ def fit_model(
     # Read data
     trainset, valset, dataset = data
     train_size = len(trainset)
-    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 3, shuffle = False)
-    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 3, shuffle = False)
+    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 0, shuffle = False)
+    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 0, shuffle = False)
   
     # Start training
     writer = SummaryWriter(log_dir='log\\{}\\{}'.format(dataset, model_name))
