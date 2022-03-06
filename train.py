@@ -15,7 +15,9 @@ def parse_arg():
     #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
     parser.add_argument('--model', type=str, default='MLP', help='Name of the model you\'re going to train')
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
+    ##
     parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
+    
     parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train')
     parser.add_argument('--bs', type=int, default=128, help='Batch size')
@@ -51,11 +53,11 @@ def main():
 
     # Read data
     if dataset == 'ImageNet1k':    
-        trainset, valset = ImageNet(root=root,flat=(not resnet),verbose=verbose)
+        trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
         output_size = 1000 # number of distinct labels
         input_size = trainset[0][0].shape[0] # input dimensions
     elif dataset == 'ImageNet64':    
-        trainset, valset = ImageNet(root=root,flat=(not resnet),verbose=verbose)
+        trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
         output_size = 1000 # number of distinct labels
         input_size = trainset[0][0].shape[0] # input dimensions
     elif dataset == 'CIFAR10':
