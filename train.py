@@ -1,7 +1,7 @@
 import torch
 import torchvision
 from torchsummary import summary
-from datasets import ImageNet
+from datasets import *
 from utils.checkpoint import load_checkpoint
 from models import MLP, fit_model
 import argparse
@@ -49,13 +49,19 @@ def main():
     if dataset == 'ImageNet1k':    
         trainset, valset = ImageNet(root=root,flat=(not resnet),verbose=verbose)
         output_size = 1000 # number of distinct labels
+        input_size = trainset[0][0].shape[0] # input dimensions
     elif dataset == 'ImageNet64':    
         trainset, valset = ImageNet(root=root,flat=(not resnet),verbose=verbose)
         output_size = 1000 # number of distinct labels
+        input_size = trainset[0][0].shape[0] # input dimensions
+    elif dataset == 'CIFAR10':
+        trainset, valset = CIFAR(root=root, flat=False, verbose=verbose)
+        output_size = 10
+        input_size = trainset[0][0].shape
     else:
         raise Exception(dataset+' dataset not supported!')
     data = trainset, valset, dataset
-    input_size = trainset[0][0].shape[0] # input dimensions
+    
     
     # Model initialization
     if resnet:
@@ -71,13 +77,14 @@ def main():
         #model.fc.requires_grad = True
     else:
         model = MLP(input_size, hidden_sizes, output_size)
-        summary(model, (1,input_size), device='cpu')
+        summary(model, (1,)+tuple(input_size), device='cpu')
     model_name = type(model).__name__
     model = model.to(device) # avoid different device error when resuming training
     prev_epoch = 0
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.001)
     criterion = torch.nn.CrossEntropyLoss()
     
+    """
     ### unused code
     if args.reg == 'l1' and not resnet:
         l1_reg = 0
@@ -85,6 +92,7 @@ def main():
             l1_reg += torch.norm(fclayer.weight, 1)
         #criterion += l1_reg
     ############
+    """
 
     # Load previously trained model if specified
     if not load_model == '':
