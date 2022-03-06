@@ -14,7 +14,7 @@ def parse_arg():
 	parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
 	parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
 	parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
-	parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
+	parser.add_argument('--dataset', type=str, default='ImageNet64', help='Dataset used for training')
 	parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
 	parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train')
 	parser.add_argument('--bs', type=int, default=128, help='Batch size')
@@ -46,7 +46,7 @@ def main():
 		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=(not resnet),verbose=verbose)
 		output_size = 1000 # number of distinct labels
 	elif dataset == 'ImageNet64':	
-		trainset, valset = ImageNet(root='data/ImageNet64/',flat=(not resnet),verbose=verbose)
+		trainset, valset = ImageNet(root='data/Imagenet64/',flat=(not resnet),verbose=verbose) # batch files
 		output_size = 1000 # number of distinct labels
 	else:
 		raise Exception(dataset+' dataset not supported!')
