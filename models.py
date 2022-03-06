@@ -47,8 +47,8 @@ def fit_model(
     # Read data
     trainset, valset, dataset = data
     train_size = len(trainset)
-    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 3, shuffle = False)
-    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 3, shuffle = False)
+    train_loader = DataLoader(trainset, batch_size = batch_size, num_workers = 4, shuffle = False)
+    val_loader = DataLoader(valset, batch_size = batch_size, num_workers = 4, shuffle = False)
   
     # Start training
     writer = SummaryWriter(log_dir='log\\{}\\{}'.format(dataset, model_name))
