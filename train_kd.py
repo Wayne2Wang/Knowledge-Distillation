@@ -163,7 +163,10 @@ def train_kd(teacherModel,
     if not epochs%save_every == 0:
         save_checkpoint('{}\\{}_{}_{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
              optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
-
+    
+    ### Save whole model (no need to redefine it -- for evaluation purposes)
+    torch.save(studentModel, 'log/{}/{}_{}_{}_model_KD.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch))
+    
     total_time = time.time() - start_time
     best_train_acc = best_train_acc1, best_train_acc5
     best_val_acc = best_val_acc1, best_val_acc5

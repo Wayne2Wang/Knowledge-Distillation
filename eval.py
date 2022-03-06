@@ -5,12 +5,26 @@ import torchmetrics
 import torchsummary
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from datasets import ImageNet
+from datasets import *
 from utils.upscaler import ModelUpscaler
+import argparse
 
 """
 A script to evaluate the accuracy of the pretrained resnets (to be extended to other models)
 """
+
+def parse_arg():
+    #Parse the command line arguments
+    parser = argparse.ArgumentParser(description='Arugments for evaluation')
+    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    parser.add_argument('--modelpath', type=str, default='MLP', help='path to the model you are tryng to evaluate')
+    parser.add_argument('--augment', action='store_true', help='If True, evaluate on augmented dataset')
+    parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
+    parser.add_argument('--root', default='data/', help='Set root of dataset')
+    parser.add_argument('--num_batches', type=int, default=1000, help='Max number of batches to evaluate on')
+    
+    args = parser.parse_args()
+    return args
 
 
 def eval_acc(model, data_loader, device, num_batches=None, verbose=False, mode='validation'):
@@ -58,14 +72,47 @@ def eval_acc(model, data_loader, device, num_batches=None, verbose=False, mode='
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
-    num_batches = 1
+     # number of batches to evaluate
     verbose = True # number of batches to run evaluation, set to inf to run on the whole dataset
-
+    
+    args = parse_arg()
+    modelpath = args.modelpath
+    augment_data = args.augment
+    dataset = args.dataset
+    root = args.root
+    num_batches = args.num_batches
+    
     #dataset = 'ImageNet64'
     #trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
-    trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=True)
-    model = torchvision.models.resnet50(pretrained=True).to(device)
-    torchsummary.summary(model, (3, 64, 64))
+    if dataset=='ImageNet64':
+        trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=augment_data)
+        if modelpath=='resnet':
+            model = torchvision.models.resnet50(pretrained=True).to(device)
+        else:
+            model = torch.load(modelpath)
+    elif dataset=='ImageNet1k':
+        trainset, valset = ImageNet(root=root + '{}/'.format(dataset), flat=False, evalmode=augment_data)
+        if modelpath=='resnet':
+            model = torchvision.models.resnet50(pretrained=True).to(device)
+        else:
+            model = torch.load(modelpath)
+    elif dataset=='CIFAR10':
+        trainset, valset = CIFAR(root=root+'{}/'.format(dataset), flat=False, evalmode=augment_data)
+        if modelpath=='resnet':
+            model = torch.hub.load("chenyaofo/pytorch-cifar-models", 'cifar10_resnet20', pretrained=True)
+        else:
+            model = torch.load(modelpath)
+    #torchsummary.summary(model, (3, 64, 64))
+    
+    """
+    # Load previously trained model if specified
+    if not load_model == '':
+        prev_epoch, _, _, _ = load_checkpoint(model, optimizer, criterion, load_model, verbose)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=regstr)
+    criterion = torch.nn.CrossEntropyLoss()
+    model_name = type(model).__name__
+    model = model.to(device) # avoid different device error when resuming training
+    """
     
     # upscaler
     #model = ModelUpscaler(model, 224)

@@ -130,6 +130,9 @@ def fit_model(
     if not epochs%save_every == 0:
         save_checkpoint('{}\\{}_{}.pt'.format(dataset, model_name, real_epoch),model, real_epoch, optimizer, criterion, total_loss, train_acc, val_acc, verbose=verbose)
 
+    ### Save whole model (no need to redefine it -- for evaluation purposes)
+    torch.save(model, 'log/{}/{}_{}_model.pt'.format(dataset, model_name, real_epoch))
+
     total_time = time.time() - start_time
     best_train_acc = best_train_acc1, best_train_acc5
     best_val_acc = best_val_acc1, best_val_acc5
