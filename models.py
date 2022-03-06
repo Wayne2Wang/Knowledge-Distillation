@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from utils.checkpoint import save_checkpoint
 from eval import eval_acc
+import numpy as np
 
 class MLP(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
@@ -15,14 +16,23 @@ class MLP(torch.nn.Module):
         self.input_size = input_size
         self.hidden_sizes  = hidden_sizes
         self.output_size = output_size
-
-        sizes = [input_size] + hidden_sizes + [output_size]
+        self.input_size = np.prod(input_size)
+        
+        sizes = [self.input_size] + hidden_sizes + [output_size]
+        
+        print(input_size)
+        print(self.input_size)
+        print(sizes[0])
+        print(sizes[1])
+        print(sizes[2])
+        
         self.fcs = torch.nn.ModuleList([torch.nn.Linear(sizes[i], sizes[i+1]) for i in range(len(sizes)-1)])
         self.relu = torch.nn.ReLU()
 
     def forward(self, x):
         num = len(self.fcs)
         output = x
+        output = torch.flatten(x, start_dim=1)
         for i in range(num-1):
             output = self.fcs[i](output)
             output = self.relu(output)
