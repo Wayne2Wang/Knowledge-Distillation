@@ -13,10 +13,9 @@ import numpy as np
 class MLP(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
         super(MLP, self).__init__()
-        self.input_size = input_size
+        self.input_size = np.prod(input_size)
         self.hidden_sizes  = hidden_sizes
         self.output_size = output_size
-        self.input_size = np.prod(input_size)
         
         sizes = [self.input_size] + hidden_sizes + [output_size]
         
