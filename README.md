@@ -21,6 +21,15 @@ To set up the right environment, run the following command
 pip install -r requirements.txt
 ```
 
+Train KD example arguments
+```
+train_kd.py --stdmodel MLP --tchmodel cifar10_resnet20 --lr 1e-3 --bs 128 --dataset CIFAR10 --verbose --epochs 10 --root "D:/Research/Dataset/CIFAR10"
+```
+Train example arguments
+```
+--model MLP --lr 1e-3 --bs 128 --dataset CIFAR10 --verbose --epochs 10 --root "D:/Research/Dataset/CIFAR10"
+```
+
 To train the MLP, run
 ```
 python train.py
