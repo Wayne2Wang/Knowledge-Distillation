@@ -114,6 +114,54 @@ class ImageNet_dataset(Dataset):
     
     def __len__(self):
         return self.ImageSet.shape[0]
+    
+class CIFAR10_dataset():
+    def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False, evalmode=False):
+        self.root = root
+        self.dtype = dtype
+        self.flat = flat
+        self.train = train
+        # upscale -> upscales image dimension to a specified size
+        self.upscale = upscale
+        self.evalmode = evalmode
+        
+        transform = self.get_transformation(evalmode, intensity)
+        
+        self.dataset = torchvision.datasets.CIFAR10(root=root, train=train,
+                                                download=True, transform=transform)
+        
+        
+        self.classes = ('plane', 'car', 'bird', 'cat',
+                   'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+    @staticmethod
+    def get_transformation(evalmode, intensity):
+        if evalmode == True:
+            transform = transforms.Compose(
+                                            [transforms.ToTensor(),
+                                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                             transforms.RandomAffine(degrees=(intensity*-30,intensity*30), translate=(intensity*0.1,intensity*0.1), 
+                                                                     scale=((1-intensity*0.2),(1+intensity*0.2)), shear=intensity*30, 
+                                                                     interpolation=transforms.InterpolationMode.BILINEAR
+                                                                     ), # applies random affine transforoms (actually might be all we need)
+                                             transforms.RandomHorizontalFlip(p=intensity*0.25), # apply random horizontal flip with probability 0.25*intensity
+                                             transforms.RandomVerticalFlip(p=intensity*0.25),
+                                             transforms.RandomPerspective(distortion_scale=intensity*0.3, p=0.25)
+                                             ])
+        else:
+            transform = transforms.Compose(
+                                            [transforms.ToTensor(),
+                                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        return transform
+    
+    def __getitem__(self, idx):
+        return self.dataset[idx]
+    
+    def pred_to_name(self, pred):
+        return self.classes[pred]
+        
+    def __len__(self):
+        return len(self.dataset)
 
 
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False):
@@ -132,9 +180,25 @@ def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=Tr
 
     return trainset, valset
 
+def CIFAR(root='data/CIFAR10/', flat=False, dtype=torch.float32, verbose=True, show=False, evalmode=False):
+    trainset = CIFAR10_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode)
+    valset = CIFAR10_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode)
+    
+    if verbose:
+        print('Successfully loaded CIFAR-10 from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
+    
+    # Show a random example
+    if not flat and show:
+        rand_int = torch.randint(len(trainset),(1,)).item()
+        img, _ = trainset[rand_int] # 3xHxW
+        plt.imshow(img.permute(1, 2, 0))
+        plt.show()
+
+    return trainset, valset
 
 def main():
-    ImageNet(root='data/ImageNet64/',show=True, flat=False)
+    #ImageNet(root='data/ImageNet64/',show=True, flat=False)
+    CIFAR(root = 'D:/Research/Dataset/CIFAR10', show=True) # change root to datapath or CIFAR
 
 if __name__ == '__main__':
     main()
