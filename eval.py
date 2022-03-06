@@ -2,6 +2,7 @@
 import torch
 import torchvision
 import torchmetrics
+import torchsummary
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datasets import ImageNet
@@ -57,12 +58,15 @@ def eval_acc(model, data_loader, device, num_batches=None, verbose=False, mode='
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
-    num_batches = 1000
+    num_batches = 1
     verbose = True # number of batches to run evaluation, set to inf to run on the whole dataset
 
-    dataset = 'ImageNet64'
-    trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
+    #dataset = 'ImageNet64'
+    #trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
+    trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=True)
     model = torchvision.models.resnet50(pretrained=True).to(device)
+    torchsummary.summary(model, (3, 64, 64))
+    
     # upscaler
     #model = ModelUpscaler(model, 224)
     train_loader = DataLoader(trainset, batch_size = 128, num_workers = 3, shuffle = False)
