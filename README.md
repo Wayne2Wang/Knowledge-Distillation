@@ -1,6 +1,6 @@
 # Knowledge-Distillation
 
-## Modified version to accept ImageNet64 downsampled data (Directly from [ImageNet](image-net.org))
+## Modified version to accept ImageNet64 downsampled data (Directly from [ImageNet](https://image-net.org/))
 
 **TODO**: 
 - [ ] Implement more efficient dataloader(FFCV/WebDataset/ImageFolder/Nvidia DALI): FFCV is the first option but it works only on Linux
