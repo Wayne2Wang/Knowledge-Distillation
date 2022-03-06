@@ -12,7 +12,8 @@ def parse_arg():
     Parse the command line arguments
     """
     parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
-    parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    parser.add_argument('--model', type=str, default='MLP', help='Name of the model you\'re going to train')
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
     parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
     parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
@@ -35,7 +36,10 @@ def main():
     verbose = True #args.verbose
     dataset = args.dataset
     save_every = args.save_every
-    resnet = args.resnet
+    
+    modelname = args.model
+    modelmethod = globals()[modelname] # call function with 'modelname' name
+    
     root = args.root
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
 
@@ -64,7 +68,7 @@ def main():
     
     
     # Model initialization
-    if resnet:
+    if modelname=='resnet':
         model = torchvision.models.resnet50(pretrained=True)
         ## freeze all layers
         numchild=1
@@ -75,9 +79,13 @@ def main():
             numchild += 1
         ### Unfreeze fully connected layer
         #model.fc.requires_grad = True
-    else:
-        model = MLP(input_size, hidden_sizes, output_size)
+    elif modelname=='MLP':
+        model = modelmethod(input_size, hidden_sizes, output_size)
         summary(model, (1,)+tuple(input_size), device='cpu')
+    else: ### currently only works for MLP
+        model = modelmethod(input_size, hidden_sizes, output_size)
+        summary(model, (1,)+tuple(input_size), device='cpu')
+        
     model_name = type(model).__name__
     model = model.to(device) # avoid different device error when resuming training
     prev_epoch = 0
