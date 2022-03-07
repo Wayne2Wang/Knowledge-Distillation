@@ -139,7 +139,9 @@ class CIFAR10_dataset():
         if evalmode == True:
             transform = transforms.Compose(
                                             [transforms.ToTensor(),
-                                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                             #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                             transforms.Normalize(mean = [0.4914, 0.4822, 0.4465],
+                                                                  std = [0.2023, 0.1994, 0.201]),
                                              transforms.RandomAffine(degrees=(intensity*-30,intensity*30), translate=(intensity*0.1,intensity*0.1), 
                                                                      scale=((1-intensity*0.2),(1+intensity*0.2)), shear=intensity*30, 
                                                                      interpolation=transforms.InterpolationMode.BILINEAR
@@ -151,7 +153,8 @@ class CIFAR10_dataset():
         else:
             transform = transforms.Compose(
                                             [transforms.ToTensor(),
-                                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+                                             transforms.Normalize(mean = [0.4914, 0.4822, 0.4465],
+                                                                  std = [0.2023, 0.1994, 0.201])])
         return transform
     
     def __getitem__(self, idx):
