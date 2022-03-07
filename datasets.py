@@ -167,9 +167,9 @@ class CIFAR10_dataset():
         return len(self.dataset)
 
 
-def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False):
-    trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode)
-    valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode)
+def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
+    trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
+    valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
 
     if verbose:
         print('Successfully loaded ImageNet from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
@@ -183,9 +183,9 @@ def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=Tr
 
     return trainset, valset
 
-def CIFAR(root='data/CIFAR10/', flat=False, dtype=torch.float32, verbose=True, show=False, evalmode=False):
-    trainset = CIFAR10_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode)
-    valset = CIFAR10_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode)
+def CIFAR(root='data/CIFAR10/', flat=False, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
+    trainset = CIFAR10_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
+    valset = CIFAR10_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
     
     if verbose:
         print('Successfully loaded CIFAR-10 from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))

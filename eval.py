@@ -15,10 +15,11 @@ A script to evaluate the accuracy of the pretrained resnets (to be extended to o
 
 def parse_arg():
     #Parse the command line arguments
+    ## Last arg: --modelpath resnet --dataset CIFAR10 --root data/CIFAR10
     parser = argparse.ArgumentParser(description='Arugments for evaluation')
     #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
     parser.add_argument('--modelpath', type=str, default='MLP', help='path to the model you are tryng to evaluate')
-    parser.add_argument('--augment', action='store_true', help='If True, evaluate on augmented dataset')
+    parser.add_argument('--augment', type=float, default=-1, help='Set intensity for augmented dataset evaluation')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
     parser.add_argument('--root', default='data/CIFAR10', help='Set root of dataset')
     parser.add_argument('--num_batches', type=int, default=1000, help='Max number of batches to evaluate on')
@@ -85,19 +86,19 @@ def main():
     #dataset = 'ImageNet64'
     #trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
     if dataset=='ImageNet64':
-        trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=augment_data)
+        trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
         if modelpath=='resnet':
             model = torchvision.models.resnet50(pretrained=True).to(device)
         else:
             model = torch.load(modelpath)
     elif dataset=='ImageNet1k':
-        trainset, valset = ImageNet(root=root, flat=False, evalmode=augment_data)
+        trainset, valset = ImageNet(root=root, flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
         if modelpath=='resnet':
             model = torchvision.models.resnet50(pretrained=True).to(device)
         else:
             model = torch.load(modelpath)
     elif dataset=='CIFAR10':
-        trainset, valset = CIFAR(root=root, flat=False, evalmode=augment_data)
+        trainset, valset = CIFAR(root=root, flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
         if modelpath=='resnet':
             model = torch.hub.load("chenyaofo/pytorch-cifar-models", 'cifar10_resnet20', pretrained=True)
             model = model.cuda()

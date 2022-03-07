@@ -12,6 +12,7 @@ def parse_arg():
     """
     Parse the command line arguments
     """
+    # Last run arg: --model MLP_drop_bnorm --load_model log/CIFAR10/MLP_drop_bnorm_40.pt --lr 1e-3 --bs 256 --hs 512 512 256 256 128 128 --dataset CIFAR10 --verbose --epochs 20 --root "D:/Research/Dataset/CIFAR10"
     parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
     #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
     parser.add_argument('--model', type=str, default='MLP', help='Name of the model you\'re going to train')
