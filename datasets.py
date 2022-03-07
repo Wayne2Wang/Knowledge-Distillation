@@ -137,6 +137,7 @@ class CIFAR10_dataset():
     @staticmethod
     def get_transformation(evalmode, intensity):
         if evalmode == True:
+            """
             transform = transforms.Compose(
                                             [transforms.ToTensor(),
                                              #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
@@ -149,6 +150,20 @@ class CIFAR10_dataset():
                                              transforms.RandomHorizontalFlip(p=intensity*0.25), # apply random horizontal flip with probability 0.25*intensity
                                              transforms.RandomVerticalFlip(p=intensity*0.25),
                                              transforms.RandomPerspective(distortion_scale=intensity*0.3, p=0.25)
+                                             ])
+            """
+            # changed to easier transform
+            transform = transforms.Compose(
+                                            [transforms.ToTensor(),
+                                             #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                             transforms.Normalize(mean = [0.4914, 0.4822, 0.4465],
+                                                                  std = [0.2023, 0.1994, 0.201]),
+                                             transforms.RandomAffine(degrees=0, translate=(intensity*0.2,intensity*0.2),
+                                                                                               shear=0,
+                                                                     interpolation=transforms.InterpolationMode.NEAREST
+                                                                     )#, # applies random affine transforoms (actually might be all we need)
+                                             #transforms.RandomHorizontalFlip(p=intensity*0.25), # apply random horizontal flip with probability 0.25*intensity
+                                             #transforms.RandomVerticalFlip(p=intensity*0.25)
                                              ])
         else:
             transform = transforms.Compose(
