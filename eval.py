@@ -100,6 +100,7 @@ def main():
         trainset, valset = CIFAR(root=root, flat=False, evalmode=augment_data)
         if modelpath=='resnet':
             model = torch.hub.load("chenyaofo/pytorch-cifar-models", 'cifar10_resnet20', pretrained=True)
+            model = model.cuda()
         else:
             model = torch.load(modelpath)
     #torchsummary.summary(model, (3, 64, 64))
