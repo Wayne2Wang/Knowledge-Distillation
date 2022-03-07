@@ -20,7 +20,7 @@ def parse_arg():
     parser.add_argument('--modelpath', type=str, default='MLP', help='path to the model you are tryng to evaluate')
     parser.add_argument('--augment', action='store_true', help='If True, evaluate on augmented dataset')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
-    parser.add_argument('--root', default='data/', help='Set root of dataset(without the dataset name)')
+    parser.add_argument('--root', default='data/CIFAR10', help='Set root of dataset')
     parser.add_argument('--num_batches', type=int, default=1000, help='Max number of batches to evaluate on')
     
     args = parser.parse_args()
@@ -91,13 +91,13 @@ def main():
         else:
             model = torch.load(modelpath)
     elif dataset=='ImageNet1k':
-        trainset, valset = ImageNet(root=root + '{}/'.format(dataset), flat=False, evalmode=augment_data)
+        trainset, valset = ImageNet(root=root, flat=False, evalmode=augment_data)
         if modelpath=='resnet':
             model = torchvision.models.resnet50(pretrained=True).to(device)
         else:
             model = torch.load(modelpath)
     elif dataset=='CIFAR10':
-        trainset, valset = CIFAR(root=root+'{}/'.format(dataset), flat=False, evalmode=augment_data)
+        trainset, valset = CIFAR(root=root, flat=False, evalmode=augment_data)
         if modelpath=='resnet':
             model = torch.hub.load("chenyaofo/pytorch-cifar-models", 'cifar10_resnet20', pretrained=True)
         else:
