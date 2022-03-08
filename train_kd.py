@@ -2,7 +2,7 @@ import torch
 import torchvision
 from tqdm import tqdm
 from torchsummary import summary
-from datasets import ImageNet
+from datasets import *
 from utils.checkpoint import load_checkpoint, save_checkpoint
 from models import MLP
 import argparse
@@ -13,43 +13,54 @@ from torch.utils.tensorboard import SummaryWriter
 import time
 from utils.upscaler import ModelUpscaler
 
+from experiment.design_JP import * # call your models here
+
 
 def parse_arg():
-	"""
-	Parse the command line arguments
-	"""
-	parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
-	parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
-	parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
-	parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
-	parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
-	parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train')
-	parser.add_argument('--bs', type=int, default=128, help='Batch size')
-	parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
-	parser.add_argument("--hs",  nargs="*",  type=int, default=[2000, 1000, 100], help='Hidden units')
-	parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
-	parser.add_argument('--temp', type=float, default=7, help='temperature')
-	parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
-	# add arg for student and teacher model
-	args = parser.parse_args()
-	return args
+    """
+    Parse the command line arguments
+    """
+    parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
+    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    parser.add_argument('--stdmodel', type=str, default='MLP', help='Name of the student model you\'re going to train')
+    parser.add_argument('--tchmodel', type=str, default='cifar10_resnet20', help='Name of the teacher model you\'re going to use')
+    
+    parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
+    parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
+    parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
+    parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train')
+    parser.add_argument('--bs', type=int, default=128, help='Batch size')
+    parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
+    parser.add_argument("--hs",  nargs="*",  type=int, default=[2000, 1000, 100], help='Hidden units')
+    parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
+    parser.add_argument('--temp', type=float, default=7, help='temperature')
+    parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
+    
+    parser.add_argument('--root', default='data/ImageNet64', help='Set root of dataset')
+    parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
+    
+    
+    
+    # add arg for student and teacher model
+    args = parser.parse_args()
+    return args
 
 
 def train_kd(teacherModel,
             studentModel,
-			data,
-			optimizerStudent,
-			student_loss,
-			divergence_loss,
-			temp,
-			alpha,
+            data,
+            optimizerStudent,
+            student_loss,
+            divergence_loss,
+            temp,
+            alpha,
             train_size,
-			prev_epoch,
+            prev_epoch,
             epochs = 10,  
             batch_size = 64, 
             save_every = 5,
             verbose = False,
-			device='cpu'
+            device='cpu'
             ):
 
     # Read data
@@ -61,7 +72,7 @@ def train_kd(teacherModel,
     model_name_teacher = type(teacherModel).__name__
     
 
-    writer = SummaryWriter(log_dir='log\\{}\\{}_{}'.format(dataset, model_name_student, model_name_teacher))
+    writer = SummaryWriter(log_dir='log/{}/{}_{}'.format(dataset, model_name_student, model_name_teacher))
     start_time = time.time()
     best_loss = float('inf')
     best_train_acc1 = 0
@@ -125,7 +136,7 @@ def train_kd(teacherModel,
         metric5.reset()
         val_acc1, val_acc5 = eval_acc(studentModel, val_loader, device) 
 
-		# update stats
+        # update stats
         best_train_acc1 = train_acc1 if train_acc1 > best_train_acc1 else best_train_acc1
         best_train_acc5 = train_acc5 if train_acc5 > best_train_acc5 else best_train_acc5
         best_val_acc1 = val_acc1 if val_acc1 > best_val_acc1 else best_val_acc1
@@ -145,14 +156,17 @@ def train_kd(teacherModel,
         train_acc = train_acc1, train_acc5
         val_acc = val_acc1, val_acc5
         if (epoch+1)%save_every == 0:
-            save_checkpoint('{}\\{}_{}_{}.pt'.format(dataset, model_name_student, model_name_teacher, real_epoch),studentModel, real_epoch,\
-			 optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
+            save_checkpoint('{}/{}_{}_{}.pt'.format(dataset, model_name_student, model_name_teacher, real_epoch),studentModel, real_epoch,\
+             optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
 
 
     if not epochs%save_every == 0:
-        save_checkpoint('{}\\{}_{}_{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
-			 optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
-
+        save_checkpoint('{}/{}_{}_{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
+             optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
+    
+    ### Save whole model (no need to redefine it -- for evaluation purposes)
+    torch.save(studentModel, 'log/{}/{}_{}_{}_model_KD.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch))
+    
     total_time = time.time() - start_time
     best_train_acc = best_train_acc1, best_train_acc5
     best_val_acc = best_val_acc1, best_val_acc5
@@ -162,89 +176,102 @@ def train_kd(teacherModel,
 
 
 def main():
-	# Read the arguments
-	args = parse_arg()
-	load_model = args.load_model
-	verbose = True #args.verbose
-	dataset = args.dataset
-	save_every = args.save_every
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
-	device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # Read the arguments
+    args = parse_arg()
+    load_model = args.load_model
+    verbose = True #args.verbose
+    dataset = args.dataset
+    save_every = args.save_every
+    
+    student_name = args.stdmodel
+    teacher_name = args.tchmodel
+    std_model_method = globals()[student_name] # call function with 'modelname' name
+    
+    root = args.root
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
+    device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
+    
+    # Hyperparameters
+    epochs = args.epochs
+    batch_size = args.bs
+    lr = args.lr
+    hidden_sizes = args.hs
+    temp = args.temp
+    alpha = args.alpha
+    regstr = args.reg
 
-	# Hyperparameters
-	epochs = args.epochs
-	batch_size = args.bs
-	lr = args.lr
-	hidden_sizes = args.hs
-	temp = args.temp
-	alpha = args.alpha
-
-	# Read data
-	if dataset == 'ImageNet1k':	
-		trainset, valset = ImageNet(root='data/ImageNet1k/',flat=False,verbose=verbose)
-		output_size = 1000 # number of distinct labels
-	elif dataset == 'ImageNet64':	
-		trainset, valset = ImageNet(root='data/ImageNet64/',flat=False,verbose=verbose)
-		output_size = 1000 # number of distinct labels
-	else:
-		raise Exception(dataset+' dataset not supported!')
-
-	train_size = len(trainset)
-	data = trainset, valset, dataset
-	input_size = trainset[0][0].reshape(-1).shape[0] # input dimensions
-	
-	# Model initialization for teacher
-	teacherModel = torchvision.models.resnet50(pretrained=True)
-	model_name_teacher = type(teacherModel).__name__
-	#teacherModel = ModelUpscaler(teacherModel, 224)
+    # Read data
+    if dataset == 'ImageNet1k':    
+        trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
+        output_size = 1000 # number of distinct labels
+        input_size = trainset[0][0].reshape(-1).shape[0] # input dimensions
+    elif dataset == 'ImageNet64':    
+        trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
+        output_size = 1000 # number of distinct labels
+        input_size = trainset[0][0].reshape(-1).shape[0] # input dimensions
+    elif dataset == 'CIFAR10':
+        trainset, valset = CIFAR(root=root, flat=False, verbose=verbose)
+        output_size = 10
+        input_size = trainset[0][0].shape
+    else:
+        raise Exception(dataset+' dataset not supported!')
+    data = trainset, valset, dataset
+    train_size = len(trainset)
+    
+    
+    # Model initialization for teacher
+    #teacherModel = torchvision.models.resnet50(pretrained=True)
+    teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
+    model_name_teacher = type(teacherModel).__name__
+    #teacherModel = ModelUpscaler(teacherModel, 224)
 
 
-	# Model initialization for student
-	studentModel = MLP(input_size, hidden_sizes, output_size)
-	studentModel = studentModel.to(device) # avoid different device error when resuming training
-	model_name_student = type(studentModel).__name__
-	summary(studentModel, (1,input_size), device=device_name)
-	
-	prev_epoch = 0
-	optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr)
-	student_loss = torch.nn.CrossEntropyLoss()
-	divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
+    # Model initialization for student
+    studentModel = std_model_method(input_size, hidden_sizes, output_size)
+    studentModel = studentModel.to(device) # avoid different device error when resuming training
+    model_name_student = type(studentModel).__name__
+    summary(studentModel, (1,) + tuple(input_size), device=device_name)
+    
+    prev_epoch = 0
+    optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr, weight_decay=regstr)
+    student_loss = torch.nn.CrossEntropyLoss()
+    divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
 
-	# Load previously trained model if specified
-	if not load_model == '':
-		prev_epoch, _, _, _ = load_checkpoint(studentModel, optimizerStudent, student_loss, load_model, verbose)
+    # Load previously trained model if specified
+    if not load_model == '':
+        prev_epoch, _, _, _ = load_checkpoint(studentModel, optimizerStudent, student_loss, load_model, verbose)
 
-	
-	# Training
-	if verbose:
-		print('\nStart training {} from teacher {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, alpha={}, temp={}, save_every={} device={}'\
-									.format(model_name_student, model_name_teacher, epochs, prev_epoch, batch_size, lr, alpha, temp, save_every, device))
+    
+    # Training
+    if verbose:
+        print('\nStart training {} from teacher {}: epoch={}, prev_epoch={}, batch_size={}, lr={}, alpha={}, temp={}, save_every={} device={}'\
+                                    .format(model_name_student, model_name_teacher, epochs, prev_epoch, batch_size, lr, alpha, temp, save_every, device))
 
-	
+    
 
-	# Train student model with soft labels from parent
-	best_loss, train_acc, val_acc, total_time = train_kd(teacherModel,
-									studentModel,
-									data,
-									optimizerStudent,
-									student_loss,
-									divergence_loss,
-									temp,
-									alpha,
-									train_size,
-									prev_epoch,
-									epochs = epochs,
-									batch_size=batch_size,
-									save_every=save_every,
-									device = device,
-									verbose = verbose
-									)
+    # Train student model with soft labels from parent
+    best_loss, train_acc, val_acc, total_time = train_kd(teacherModel,
+                                    studentModel,
+                                    data,
+                                    optimizerStudent,
+                                    student_loss,
+                                    divergence_loss,
+                                    temp,
+                                    alpha,
+                                    train_size,
+                                    prev_epoch,
+                                    epochs = epochs,
+                                    batch_size=batch_size,
+                                    save_every=save_every,
+                                    device = device,
+                                    verbose = verbose
+                                    )
 
-	if verbose:
-		print('\nTraining finished! \nTime: {:2f}, (best) train loss: {:5f}, train acc1: {:5f}, train acc5: {:5f}, val acc1: {:5f}, val acc5: {:5f}' \
-														.format(total_time, best_loss, train_acc[0], train_acc[1], val_acc[0], val_acc[1]))
-	
-									
+    if verbose:
+        print('\nTraining finished! \nTime: {:2f}, (best) train loss: {:5f}, train acc1: {:5f}, train acc5: {:5f}, val acc1: {:5f}, val acc5: {:5f}' \
+                                                        .format(total_time, best_loss, train_acc[0], train_acc[1], val_acc[0], val_acc[1]))
+    
+                                    
 
 if __name__ == '__main__':
-	main()
+    main()
