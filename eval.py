@@ -1,14 +1,16 @@
+import argparse
+from tqdm import tqdm
+from datetime import datetime
 
 import torch
 import torchvision
 import torchmetrics
 import torchsummary
 from torch.utils.data import DataLoader
-from tqdm import tqdm
+
 from datasets import *
 from utils.upscaler import ModelUpscaler
-import argparse
-from datetime import datetime
+
 
 """
 A script to evaluate the accuracy of the pretrained resnets (to be extended to other models)
@@ -18,7 +20,7 @@ def parse_arg():
     #Parse the command line arguments
     ## Last arg: --modelpath resnet --dataset CIFAR10 --root data/CIFAR10
     parser = argparse.ArgumentParser(description='Arugments for evaluation')
-    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+
     parser.add_argument('--modelpath', type=str, default='MLP', help='path to the model you are tryng to evaluate')
     parser.add_argument('--augment', type=float, default=-1, help='Set intensity for augmented dataset evaluation (-1:off)')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
@@ -96,7 +98,8 @@ def main():
     #dataset = 'ImageNet64'
     #trainset, valset = ImageNet(root='data/{}/'.format(dataset), flat=False, evalmode=True)
     if dataset=='ImageNet64':
-        trainset, valset = ImageNet(root='D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/', flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
+        # 'D:/Research/Dataset/ImageNet64_Zilin/ImageNet64/'
+        trainset, valset = ImageNet(root=root, flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
         if modelpath=='resnet':
             model = torchvision.models.resnet50(pretrained=True).to(device)
         else:
@@ -114,6 +117,15 @@ def main():
             model = model.cuda()
         else:
             model = torch.load(modelpath)
+    elif dataset=='MNIST':
+        trainset, valset =  MNIST(root=root, flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
+        if modelpath=='CNN_MNIST':
+            model = torch.load('assets/CNN_MNIST_10_model.pt')
+            model = model.cuda()
+        else:
+            model = torch.load(modelpath)
+    else:
+        raise Exception(dataset+' dataset not supported!')
     #torchsummary.summary(model, (3, 64, 64))
     
     """

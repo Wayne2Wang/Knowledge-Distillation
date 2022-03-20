@@ -1,14 +1,16 @@
 import time
+import numpy as np
+from tqdm import tqdm
+
 import torch
 import torchmetrics
-
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
-from tqdm import tqdm
+import torch.nn as nn
 
 from utils.checkpoint import save_checkpoint
 from eval import eval_acc
-import numpy as np
+
 
 class MLP(torch.nn.Module):
     def __init__(self, input_size, hidden_sizes, output_size):
@@ -31,6 +33,33 @@ class MLP(torch.nn.Module):
             output = self.relu(output)
         output = self.fcs[num-1](output)
         return output
+
+
+class CNN_MNIST(torch.nn.Module):
+    # input size for MNIST is 1x28x28
+    def __init__(self, input_dim, output_dim):
+        super(CNN_MNIST, self).__init__()
+        self.cnn_layers = nn.Sequential(
+            nn.Conv2d(input_dim, 32, kernel_size=3, stride=2, padding=1), # 14
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=2, stride=2, padding=0), # 7
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=0), # 5
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=0), # 3
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+        )
+        self.fc = nn.Linear(256*3*3, output_dim)
+
+    def forward(self, x):
+        x = self.cnn_layers(x)
+        x = x.reshape(x.shape[0],-1)
+        x = self.fc(x)
+        return x
 
 
 def fit_model(
