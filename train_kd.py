@@ -73,7 +73,7 @@ def train_kd(teacherModel,
     model_name_teacher = type(teacherModel).__name__
     
 
-    writer = SummaryWriter(log_dir='log/{}/{}_{}'.format(dataset, model_name_student, model_name_teacher))
+    writer = SummaryWriter(log_dir='log/{}/{}/{}'.format(dataset, model_name_student, model_name_teacher))
     start_time = time.time()
     best_loss = float('inf')
     best_train_acc1 = 0
@@ -157,16 +157,16 @@ def train_kd(teacherModel,
         train_acc = train_acc1, train_acc5
         val_acc = val_acc1, val_acc5
         if (epoch+1)%save_every == 0:
-            save_checkpoint('{}/{}_{}_{}.pt'.format(dataset, model_name_student, model_name_teacher, real_epoch),studentModel, real_epoch,\
+            save_checkpoint('log/{}/{}/{}/{}.pt'.format(dataset, model_name_student, model_name_teacher, real_epoch),studentModel, real_epoch,\
              optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
 
 
     if not epochs%save_every == 0:
-        save_checkpoint('{}/{}_{}_{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
+        save_checkpoint('log/{}/{}/{}/{}.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch),studentModel, real_epoch,\
              optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
     
     ### Save whole model (no need to redefine it -- for evaluation purposes)
-    torch.save(studentModel, 'log/{}/{}_{}_{}_model_KD.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch))
+    torch.save(studentModel, 'log/{}/{}/{}/{}_model_KD.pt'.format(dataset, model_name_student,model_name_teacher, real_epoch))
     
     total_time = time.time() - start_time
     best_train_acc = best_train_acc1, best_train_acc5
