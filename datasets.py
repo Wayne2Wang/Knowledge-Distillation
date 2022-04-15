@@ -250,7 +250,19 @@ class MNIST_C_ds(Dataset):
         self.train_lab = torch.tensor(train_lab)
         self.test_img = torch.tensor(test_img)
         self.test_lab = torch.tensor(test_lab)
+
+    def __getitem__(self, idx):
+        pass
+    
+    def pred_to_name(self, pred):
+        pass
+        #return self.label_names_readable[pred]
         
+    
+    def __len__(self):
+        pass
+        #return self.ImageSet.shape[0]
+
 
 
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
