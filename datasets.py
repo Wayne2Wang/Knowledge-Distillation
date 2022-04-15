@@ -1,6 +1,7 @@
 import os
 import ast
 import pandas as pd
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
@@ -227,6 +228,29 @@ class MNIST_dataset():
         
     def __len__(self):
         return len(self.dataset)
+
+class MNIST_C_ds(Dataset):
+    def __init__(self, path, type='translate', dtype=torch.float32):
+        """
+        Reads MNIST-C .npy files as torch tensor
+
+        inputs:
+        path: (string) path to mnist_c dataset.
+        type: (string) type of corruptions (brightness, canny_edges, ..., rotate, scale, translate, ...)
+        dtype: (type) data type (default: torch.float32)
+        """
+        
+        path_to_type = os.path.join(path,type) # path to directory
+        train_img = np.load(os.path.join(path_to_type, 'train_images.npy')) # image data
+        train_lab = np.load(os.path.join(path_to_type, 'train_labels.npy')) # label data
+        test_img = np.load(os.path.join(path_to_type, 'test_images.npy'))
+        test_lab = np.load(os.path.join(path_to_type, 'test_labels.npy'))
+
+        self.train_img = torch.tensor(train_img)
+        self.train_lab = torch.tensor(train_lab)
+        self.test_img = torch.tensor(test_img)
+        self.test_lab = torch.tensor(test_lab)
+        
 
 
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
