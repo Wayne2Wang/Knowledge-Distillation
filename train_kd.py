@@ -42,6 +42,8 @@ def parse_arg():
     parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
     parser.add_argument('--temp', type=float, default=7, help='temperature')
     parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
+    # MNIST-C Specific settings
+    parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
     
     args = parser.parse_args()
     return args
@@ -232,7 +234,15 @@ def main():
         input_size = trainset[0][0].shape
 
         # Here teacher model is a vanilla CNN trained on MNIST for 10 epochs, to be improved
-        teacherModel = torch.load('assets/CNN_MNIST_10_model.pt')
+        #teacherModel = torch.load('assets/CNN_MNIST_10_model.pt')
+        teacherModel = torch.load('assets/60_model.pt')
+        studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
+    elif dataset == 'MNIST_C':
+        trainset, valset = MNIST_C(root=root, verbose=verbose, type=args.augtype)
+        output_size = 10
+        input_size = trainset[0][0].shape
+
+        teacherModel = torch.load('assets/60_model.pt')
         studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
     else:
         raise Exception(dataset+' dataset not supported!')

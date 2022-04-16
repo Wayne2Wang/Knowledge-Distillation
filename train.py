@@ -28,6 +28,8 @@ def parse_arg():
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument("--hs",  nargs="*",  type=int, default=[2000, 1000, 100], help='Hidden units')
     parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
+    # MNIST-C Specific settings
+    parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
     
     ### model checkpoint
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
@@ -73,6 +75,10 @@ def main():
         input_size = trainset[0][0].shape
     elif dataset == 'MNIST':
         trainset, valset = MNIST(root=root, flat=False, verbose=verbose)
+        output_size = 10
+        input_size = trainset[0][0].shape
+    elif dataset == 'MNIST_C':
+        trainset, valset = MNIST_C(root=root, verbose=verbose, type=args.augtype)
         output_size = 10
         input_size = trainset[0][0].shape
     else:

@@ -230,37 +230,40 @@ class MNIST_dataset():
         return len(self.dataset)
 
 class MNIST_C_ds(Dataset):
-    def __init__(self, path, type='translate', dtype=torch.float32):
+    def __init__(self, path, type='translate', data='train', dtype=torch.float32):
         """
         Reads MNIST-C .npy files as torch tensor
 
         inputs:
         path: (string) path to mnist_c dataset.
         type: (string) type of corruptions (brightness, canny_edges, ..., rotate, scale, translate, ...)
+        data: (string) 'train' or 'test' data
         dtype: (type) data type (default: torch.float32)
         """
-        
+        super(MNIST_C_ds, self).__init__()
         path_to_type = os.path.join(path,type) # path to directory
-        train_img = np.load(os.path.join(path_to_type, 'train_images.npy')) # image data
-        train_lab = np.load(os.path.join(path_to_type, 'train_labels.npy')) # label data
-        test_img = np.load(os.path.join(path_to_type, 'test_images.npy'))
-        test_lab = np.load(os.path.join(path_to_type, 'test_labels.npy'))
 
-        self.train_img = torch.tensor(train_img)
-        self.train_lab = torch.tensor(train_lab)
-        self.test_img = torch.tensor(test_img)
-        self.test_lab = torch.tensor(test_lab)
+        self.img = np.load(os.path.join(path_to_type, '{}_images.npy'.format(data))) # image data
+        self.lab = np.load(os.path.join(path_to_type, '{}_labels.npy'.format(data))) # label data
+        
+        self.img = torch.tensor(self.img, dtype=dtype)
+        self.lab = torch.tensor(self.lab, dtype=torch.int64) # labels must be integers
+
+        #train_img = np.load(os.path.join(path_to_type, 'train_images.npy')) # image data
+        #train_lab = np.load(os.path.join(path_to_type, 'train_labels.npy')) # label data
+        #test_img = np.load(os.path.join(path_to_type, 'test_images.npy'))
+        #test_lab = np.load(os.path.join(path_to_type, 'test_labels.npy'))
+
+        #self.train_img = torch.tensor(train_img)
+        #self.train_lab = torch.tensor(train_lab)
+        #self.test_img = torch.tensor(test_img)
+        #self.test_lab = torch.tensor(test_lab)
 
     def __getitem__(self, idx):
-        pass
-    
-    def pred_to_name(self, pred):
-        pass
-        #return self.label_names_readable[pred]
-        
+        return self.img[idx], self.lab[idx]
     
     def __len__(self):
-        pass
+        return len(self.lab)
         #return self.ImageSet.shape[0]
 
 
@@ -306,6 +309,23 @@ def MNIST(root='data/MNIST/', flat=False, dtype=torch.float32, verbose=True, sho
     
     # Show a random example
     if not flat and show:
+        rand_int = torch.randint(len(trainset),(1,)).item()
+        img, _ = trainset[rand_int] # 3xHxW
+        plt.imshow(img.permute(1, 2, 0))
+        plt.show()
+
+    return trainset, valset
+
+def MNIST_C(root='data/MNIST/', dtype=torch.float32, verbose=True, show=False, type='translate'):
+
+    trainset = MNIST_C_ds(path=root, type=type, data='train', dtype=dtype)
+    valset = MNIST_C_ds(path=root, type=type, data='test', dtype=dtype)
+    
+    if verbose:
+        print('Successfully loaded MNIST from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
+    
+    # Show a random example
+    if show:
         rand_int = torch.randint(len(trainset),(1,)).item()
         img, _ = trainset[rand_int] # 3xHxW
         plt.imshow(img.permute(1, 2, 0))
