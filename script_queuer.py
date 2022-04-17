@@ -11,7 +11,7 @@ import subprocess
 from time import sleep
 
 #--modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment -1 --dataset CIFAR10 --root data/CIFAR10
-mode = 'train'
+mode = 'eval'
 procs = []
 if mode=='eval':
     print("Current setting: translation only")
@@ -23,22 +23,6 @@ if mode=='eval':
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_56_model.pt --augment 0.8 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm_eval.txt',
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_56_model.pt --augment 1.6 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm_eval.txt'
             #],
-<<<<<<< Updated upstream
-            [' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment -1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
-            ' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
-            ' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.2 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
-            ' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.4 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
-            ' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.8 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
-            ' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 1.6 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt'
-            ]#,
-            #[' --modelpath resnet --augment -1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt',
-            #' --modelpath resnet --augment 0.1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt',
-            #' --modelpath resnet --augment 0.2 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt',
-            #' --modelpath resnet --augment 0.4 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt',
-            #' --modelpath resnet --augment 0.8 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt',
-            #' --modelpath resnet --augment 1.6 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/resnet_eval.txt'
-            #]
-=======
             #[' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment -1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.2 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
@@ -53,18 +37,12 @@ if mode=='eval':
              ' --modelpath log/MNIST/MLP_drop_bnorm2/30_model.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
              ' --modelpath log/MNIST/MLP_drop_bnorm2/30_model.pt --dataset MNIST --root D:/Research/Dataset/MNIST'
             ]
->>>>>>> Stashed changes
             ]
     for i in range(len(python_scripts_to_run)):
         for arg in args[i]:
             procs.append(python_scripts_to_run[i]+arg)
             
 elif mode=='train':
-<<<<<<< Updated upstream
-    python_scripts_to_run = ['train_kd.py', 'train.py']
-    args = [[' --stdmodel MLP_drop_bnorm --lr 1e-3 --bs 256 --hs 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 60 --root "D:/Research/Dataset/CIFAR10"'],
-             [' --model MLP_drop_bnorm, --lr 1e-3, --bs 256, --hs 512 256 128, --dataset CIFAR10 --verbose --epochs 60 --root "D:/Research/Dataset/CIFAR10"']
-=======
     python_scripts_to_run = [
                                 #'train.py',
                                 #'train.py',
@@ -75,7 +53,6 @@ elif mode=='train':
             #[' --model MLP_drop_bnorm2 --lr 1e-3 --bs 256 --hs 256 256 128 128 --dataset MNIST --verbose --epochs 30 --root D:/Research/Dataset/MNIST'],
             [' --stdmodel MLP_drop_bnorm2 --lr 1e-3 --bs 64 --hs 256 256 128 128 --dataset MNIST --alpha=0.3 --temp 3.1622776601683795 --verbose --epochs 30 --root D:/Research/Dataset/MNIST --thook=cnn_layers --shook=fc']#,
             #[' --stdmodel MLP_drop_bnorm --lr 1e-3 --bs 256 --hs 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 60 --root "D:/Research/Dataset/CIFAR10"']#,
->>>>>>> Stashed changes
             #' --stdmodel MLP_drop_bnorm --load_model log/CIFAR10/MLP_drop_bnorm_CifarResNet_56.pt --lr 1e-3 --bs 256 --hs 512 512 256 256 128 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 0 --root "D:/Research/Dataset/CIFAR10"'
             ]
     for i in range(len(python_scripts_to_run)):

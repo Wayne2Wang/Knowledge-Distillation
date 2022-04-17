@@ -2,6 +2,7 @@ import os
 import torch
 import ast
 import pandas as pd
+import numpy as np
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.dataset import Dataset
@@ -182,8 +183,6 @@ class CIFAR10_dataset():
         return len(self.dataset)
 
 
-<<<<<<< Updated upstream
-=======
 class MNIST_dataset():
     def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False, evalmode=False):
         self.root = root
@@ -245,7 +244,8 @@ class MNIST_C_ds(Dataset):
         self.lab = np.load(os.path.join(path_to_type, '{}_labels.npy'.format(data))) # label data
         
         self.img = torch.tensor(self.img, dtype=dtype)
-        transform = transforms.Compose([transforms.Normalize((0.1307,), (0.3081,)),])
+        self.img = (self.img - torch.min(self.img)) / (torch.max(self.img) - torch.min(self.img)) # normalize data
+        transform = transforms.Compose([transforms.Normalize((0.1307,), (0.3081,)),]) # zero-mean / 1-std data
         self.img = transform(self.img)
         self.lab = torch.tensor(self.lab, dtype=torch.int64) # labels must be integers
 
@@ -266,9 +266,39 @@ class MNIST_C_ds(Dataset):
         return len(self.lab)
         #return self.ImageSet.shape[0]
 
+def MNIST(root='data/MNIST/', flat=False, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
+    trainset = MNIST_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
+    valset = MNIST_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
+    
+    if verbose:
+        print('Successfully loaded MNIST from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
+    
+    # Show a random example
+    if not flat and show:
+        rand_int = torch.randint(len(trainset),(1,)).item()
+        img, _ = trainset[rand_int] # 3xHxW
+        plt.imshow(img.permute(1, 2, 0))
+        plt.show()
 
+    return trainset, valset
 
->>>>>>> Stashed changes
+def MNIST_C(root='data/MNIST/', dtype=torch.float32, verbose=True, show=False, type='translate'):
+
+    trainset = MNIST_C_ds(path=root, type=type, data='train', dtype=dtype)
+    valset = MNIST_C_ds(path=root, type=type, data='test', dtype=dtype)
+    
+    if verbose:
+        print('Successfully loaded MNIST from {}, image shape {}\n'.format(root, trainset[0][0].numpy().shape))
+    
+    # Show a random example
+    if show:
+        rand_int = torch.randint(len(trainset),(1,)).item()
+        img, _ = trainset[rand_int] # 3xHxW
+        plt.imshow(img.permute(1, 2, 0))
+        plt.show()
+
+    return trainset, valset
+
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
     trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
     valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)

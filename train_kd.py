@@ -20,13 +20,19 @@ def parse_arg():
     """
     Parse the command line arguments
     """
-    parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model')
-    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+    parser = argparse.ArgumentParser(description='Arugments for fitting the feedforward model with kd')
+
+    ### most frequently used arguments
     parser.add_argument('--stdmodel', type=str, default='MLP', help='Name of the student model you\'re going to train')
     parser.add_argument('--tchmodel', type=str, default='cifar10_resnet20', help='Name of the teacher model you\'re going to use')
+    parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset used for training')
+    parser.add_argument('--root', default='data/CIFAR10', help='Set root of dataset')
     
+    ### model checkpoint
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
-    parser.add_argument('--dataset', type=str, default='ImageNet1k', help='Dataset used for training')
+    parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
+
+    ### training settings
     parser.add_argument('--verbose', action='store_true', help='If True, print training progress')
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs to train')
     parser.add_argument('--bs', type=int, default=128, help='Batch size')
@@ -34,17 +40,11 @@ def parse_arg():
     parser.add_argument("--hs",  nargs="*",  type=int, default=[2000, 1000, 100], help='Hidden units')
     parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
     parser.add_argument('--temp', type=float, default=7, help='temperature')
-    parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
-    
-    parser.add_argument('--root', default='data/ImageNet64', help='Set root of dataset')
     parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
-<<<<<<< Updated upstream
-=======
     parser.add_argument('--thook', type=str, default='layername', help='Name of the teacher layer to match')
     parser.add_argument('--shook', type=str, default='layername', help='Name of the student layer to match')
     # MNIST-C Specific settings
     parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
->>>>>>> Stashed changes
     
     
     
@@ -231,20 +231,7 @@ def mainkd(
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
     device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
     
-<<<<<<< Updated upstream
-    # Hyperparameters
-    epochs = args.epochs
-    batch_size = args.bs
-    lr = args.lr
-    hidden_sizes = args.hs
-    temp = args.temp
-    alpha = args.alpha
-    regstr = args.reg
-
-    # Read data
-=======
     # Read data and initialize model
->>>>>>> Stashed changes
     if dataset == 'ImageNet1k':    
         trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
         output_size = 1000 # number of distinct labels
@@ -257,8 +244,6 @@ def mainkd(
         trainset, valset = CIFAR(root=root, flat=False, verbose=verbose)
         output_size = 10
         input_size = trainset[0][0].shape
-<<<<<<< Updated upstream
-=======
 
         teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
         studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
@@ -277,9 +262,8 @@ def mainkd(
         output_size = 10
         input_size = trainset[0][0].shape
 
-        teacherModel = torch.load('assets/60_model.pt')
+        teacherModel = torch.load('assets/CNN_JP2_30_model.pt')
         studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
->>>>>>> Stashed changes
     else:
         raise Exception(dataset+' dataset not supported!')
     data = trainset, valset, dataset
@@ -288,7 +272,7 @@ def mainkd(
     
     # Model initialization for teacher
     #teacherModel = torchvision.models.resnet50(pretrained=True)
-    teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
+    #teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
     model_name_teacher = type(teacherModel).__name__
     #teacherModel = ModelUpscaler(teacherModel, 224)
 
@@ -371,16 +355,16 @@ if __name__ == '__main__':
     teacherhook = args.thook
     studenthook = args.shook
 
-    custom_args = False # custom args for debugging
+    custom_args = True # custom args for debugging
     if custom_args:
         load_model = ''
         verbose = True
-        dataset = 'MNIST'
+        dataset = 'MNIST_C'
         save_every = 1
 
         student_name = 'MLP_drop_bnorm2' #MLP_drop_bnorm2
         teacher_name = 'CNN_JP2' #CNN_JP2
-        root = 'D:/Research/Dataset/MNIST'
+        root = 'D:/Research/Dataset/MNIST-C/mnist_c'#root = 'D:/Research/Dataset/MNIST-C/mnist_c'
 
         epochs = 30
         batch_size = 64

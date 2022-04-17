@@ -18,13 +18,15 @@ def parse_arg():
     #Parse the command line arguments
     ## Last arg: --modelpath resnet --dataset CIFAR10 --root data/CIFAR10
     parser = argparse.ArgumentParser(description='Arugments for evaluation')
-    #parser.add_argument('--resnet', action='store_true', help='If True, train a resnet(for testing purpose)')
+
     parser.add_argument('--modelpath', type=str, default='MLP', help='path to the model you are tryng to evaluate')
     parser.add_argument('--augment', type=float, default=-1, help='Set intensity for augmented dataset evaluation (-1:off)')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
     parser.add_argument('--root', default='data/CIFAR10', help='Set root of dataset')
     parser.add_argument('--num_batches', type=int, default=1000, help='Max number of batches to evaluate on')
     parser.add_argument('--outfilepath', default='', help='output result to this file if specified')
+    # MNIST-C Specific settings
+    parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
     
     args = parser.parse_args()
     return args
@@ -114,6 +116,22 @@ def main():
             model = model.cuda()
         else:
             model = torch.load(modelpath)
+    elif dataset=='MNIST':
+        trainset, valset =  MNIST(root=root, flat=False, evalmode=(True if augment_data >= 0 else False), intensity=augment_data)
+        if modelpath=='CNN_MNIST':
+            model = torch.load('assets/CNN_MNIST_10_model.pt')
+            model = model.cuda()
+        else:
+            model = torch.load(modelpath)
+    elif dataset == 'MNIST_C':
+        trainset, valset = MNIST_C(root=root, verbose=verbose, type=args.augtype)
+        if modelpath=='CNN_MNIST':
+            model = torch.load('assets/CNN_MNIST_10_model.pt')
+            model = model.cuda()
+        else:
+            model = torch.load(modelpath)
+    else:
+        raise Exception(dataset+' dataset not supported!')
     #torchsummary.summary(model, (3, 64, 64))
     
     """
