@@ -38,13 +38,19 @@ def parse_arg():
     
     parser.add_argument('--root', default='data/ImageNet64', help='Set root of dataset')
     parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
+<<<<<<< Updated upstream
+=======
+    parser.add_argument('--thook', type=str, default='layername', help='Name of the teacher layer to match')
+    parser.add_argument('--shook', type=str, default='layername', help='Name of the student layer to match')
+    # MNIST-C Specific settings
+    parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
+>>>>>>> Stashed changes
     
     
     
     # add arg for student and teacher model
     args = parser.parse_args()
     return args
-
 
 def train_kd(teacherModel,
             studentModel,
@@ -60,6 +66,8 @@ def train_kd(teacherModel,
             batch_size = 64, 
             save_every = 5,
             verbose = False,
+            teacherhook='layername', # name of layer to hook
+            studenthook='layername', # name of layer to hook
             device='cpu'
             ):
 
@@ -101,6 +109,22 @@ def train_kd(teacherModel,
             # clear gradient
             optimizerStudent.zero_grad()
 
+            if teacherhook != 'layername': # if defined
+                features={} # dict to store the intermediate activation
+                def get_features(name):
+                    """
+                    extracts layer output of layername 'name'
+
+                    inputs:
+                    name: layername
+                    """
+                    def hook(model, input, output):
+                        features[name] = output
+                    return hook
+                
+                hteacher = teacherModel.cnn_layers.register_forward_hook(get_features('teacher_out')) # get hooked output
+                hstudent = studentModel.bnorm[3].register_forward_hook(get_features('student_out')) # hardcoded!!!
+
             # forward
             with torch.no_grad():
                 teacher_preds = teacherModel(x_batch)
@@ -108,17 +132,22 @@ def train_kd(teacherModel,
             student_preds = studentModel(x_batch.reshape(x_batch.shape[0],-1))
             student_loss_value = student_loss(student_preds, y_batch)
             
-            distillation_loss = divergence_loss(
-                torch.nn.functional.log_softmax(student_preds / temp, dim=1),
-                torch.nn.functional.softmax(teacher_preds / temp, dim=1)
-            )
+            if teacherhook=='layername': # if not specified, do KL Div on output
+                distillation_loss = divergence_loss(
+                    torch.nn.functional.log_softmax(student_preds / temp, dim=1),
+                    torch.nn.functional.softmax(teacher_preds / temp, dim=1)
+                )
+            else:
+                distillation_loss = divergence_loss( # this should be L1 or L2 loss (MSE loss)
+                    studentModel.relu(features['student_out']), features['teacher_out'].flatten(start_dim=1)
+                )
 
             # Compute train acc
             metric1.update(student_preds, y_batch)
             metric5.update(student_preds, y_batch)
 
             # Record loss   
-            loss = alpha * student_loss_value + (1 - alpha) * (temp**2) *distillation_loss
+            loss = alpha * student_loss_value + (1 - alpha) * (temp**2) * distillation_loss
             loss_value = loss.item()
             total_loss += loss_value
 
@@ -127,6 +156,9 @@ def train_kd(teacherModel,
             loss.backward()
 
             optimizerStudent.step()
+
+            hteacher.remove()
+            hstudent.remove()
 
         # Evaluate this epoch
         total_loss /= train_size
@@ -175,22 +207,31 @@ def train_kd(teacherModel,
 
 
 
-def main():
-    # Read the arguments
-    args = parse_arg()
-    load_model = args.load_model
-    verbose = True #args.verbose
-    dataset = args.dataset
-    save_every = args.save_every
+def mainkd(
+    load_model,
+    verbose,
+    dataset,
+    save_every,
+    student_name,
+    teacher_name,
+    root,
+    epochs,
+    batch_size,
+    lr,
+    hidden_sizes,
+    temp,
+    alpha,
+    regstr,
+    augtype,
+    teacherhook='layername',
+    studenthook='layername'
+):
     
-    student_name = args.stdmodel
-    teacher_name = args.tchmodel
     std_model_method = globals()[student_name] # call function with 'modelname' name
-    
-    root = args.root
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # 'cpu'
     device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
     
+<<<<<<< Updated upstream
     # Hyperparameters
     epochs = args.epochs
     batch_size = args.bs
@@ -201,6 +242,9 @@ def main():
     regstr = args.reg
 
     # Read data
+=======
+    # Read data and initialize model
+>>>>>>> Stashed changes
     if dataset == 'ImageNet1k':    
         trainset, valset = ImageNet(root=root,flat=(False if modelname=='resnet' else True),verbose=verbose)
         output_size = 1000 # number of distinct labels
@@ -213,6 +257,29 @@ def main():
         trainset, valset = CIFAR(root=root, flat=False, verbose=verbose)
         output_size = 10
         input_size = trainset[0][0].shape
+<<<<<<< Updated upstream
+=======
+
+        teacherModel = torch.hub.load("chenyaofo/pytorch-cifar-models", teacher_name, pretrained=True)
+        studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
+
+    elif dataset == 'MNIST':
+        trainset, valset = MNIST(root=root, flat=False, verbose=verbose)
+        output_size = 10
+        input_size = trainset[0][0].shape
+
+        # Here teacher model is a vanilla CNN trained on MNIST for 10 epochs, to be improved
+        #teacherModel = torch.load('assets/CNN_MNIST_10_model.pt')
+        teacherModel = torch.load('log/MNIST/CNN_JP2/CNN_JP2_30_model.pt')
+        studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
+    elif dataset == 'MNIST_C':
+        trainset, valset = MNIST_C(root=root, verbose=verbose, type=augtype)
+        output_size = 10
+        input_size = trainset[0][0].shape
+
+        teacherModel = torch.load('assets/60_model.pt')
+        studentModel = std_model_method(input_size, hidden_sizes, output_size).to(device)
+>>>>>>> Stashed changes
     else:
         raise Exception(dataset+' dataset not supported!')
     data = trainset, valset, dataset
@@ -235,7 +302,10 @@ def main():
     prev_epoch = 0
     optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr, weight_decay=regstr)
     student_loss = torch.nn.CrossEntropyLoss()
-    divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
+    if teacherhook == 'layername':
+        divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
+    else:
+        divergence_loss = torch.nn.MSELoss()
 
     # Load previously trained model if specified
     if not load_model == '':
@@ -264,7 +334,9 @@ def main():
                                     batch_size=batch_size,
                                     save_every=save_every,
                                     device = device,
-                                    verbose = verbose
+                                    verbose = verbose,
+                                    teacherhook=teacherhook,
+                                    studenthook=studenthook
                                     )
 
     if verbose:
@@ -274,4 +346,58 @@ def main():
                                     
 
 if __name__ == '__main__':
-    main()
+    # Read the arguments
+    args = parse_arg()
+    load_model = args.load_model
+    verbose = True #args.verbose
+    dataset = args.dataset
+    save_every = args.save_every
+    
+    student_name = args.stdmodel
+    teacher_name = args.tchmodel
+
+    root = args.root
+
+    # Hyperparameters
+    epochs = args.epochs
+    batch_size = args.bs
+    lr = args.lr
+    hidden_sizes = args.hs
+    temp = args.temp
+    alpha = args.alpha
+    regstr = args.reg
+    augtype = args.augtype
+
+    teacherhook = args.thook
+    studenthook = args.shook
+
+    custom_args = False # custom args for debugging
+    if custom_args:
+        load_model = ''
+        verbose = True
+        dataset = 'MNIST'
+        save_every = 1
+
+        student_name = 'MLP_drop_bnorm2' #MLP_drop_bnorm2
+        teacher_name = 'CNN_JP2' #CNN_JP2
+        root = 'D:/Research/Dataset/MNIST'
+
+        epochs = 30
+        batch_size = 64
+        lr = 5e-4
+        hidden_sizes = [256, 256, 128, 128]
+        temp = 10**0.5
+        alpha = 0.3
+        regstr=1e-3
+        augtype='translate'
+        
+        teacherhook = 'cnn_layers'
+        studenthook = 'fc'
+
+
+    mainkd( # pass to main ftn
+        load_model, verbose, dataset, save_every,
+        student_name, teacher_name, root, epochs,
+        batch_size, lr, hidden_sizes, temp, alpha, regstr, augtype,
+        teacherhook, studenthook
+    )

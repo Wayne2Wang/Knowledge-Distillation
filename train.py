@@ -87,6 +87,12 @@ def main():
     elif modelname=='MLP':
         model = modelmethod(input_size, hidden_sizes, output_size)
         summary(model, (1,)+tuple(input_size), device='cpu')
+<<<<<<< Updated upstream
+=======
+    elif modelname == 'CNN_MNIST' or modelname=='CNN_JP1' or modelname=='CNN_JP2':
+        model = modelmethod(input_size[0], output_size)
+        summary(model, tuple(input_size), device='cpu')
+>>>>>>> Stashed changes
     else: ### currently only works for MLP
         model = modelmethod(input_size, hidden_sizes, output_size)
         summary(model, (1,)+tuple(input_size), device='cpu')

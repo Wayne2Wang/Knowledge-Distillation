@@ -182,6 +182,93 @@ class CIFAR10_dataset():
         return len(self.dataset)
 
 
+<<<<<<< Updated upstream
+=======
+class MNIST_dataset():
+    def __init__(self,root, dtype, train=True, flat=True, intensity=1, upscale=False, evalmode=False):
+        self.root = root
+        self.dtype = dtype
+        self.flat = flat
+        self.train = train
+        # upscale -> upscales image dimension to a specified size
+        self.upscale = upscale
+        self.evalmode = evalmode
+        
+        transform = self.get_transformation(evalmode, intensity)
+        
+        self.dataset = torchvision.datasets.MNIST(root=root, train=train,
+                                                download=True, transform=transform)
+        
+
+    @staticmethod
+    def get_transformation(evalmode, intensity):
+        if evalmode == True:
+            # changed to easier transform
+            transform = transforms.Compose(
+                                            [transforms.ToTensor(),
+                                             #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                             transforms.Normalize((0.1307,), (0.3081,)),
+                                             transforms.RandomAffine(degrees=0, translate=(intensity*0.2,intensity*0.2),
+                                                                                               shear=0,
+                                                                     interpolation=transforms.InterpolationMode.NEAREST
+                                                                     )#, # applies random affine transforoms (actually might be all we need)
+                                             #transforms.RandomHorizontalFlip(p=intensity*0.25), # apply random horizontal flip with probability 0.25*intensity
+                                             #transforms.RandomVerticalFlip(p=intensity*0.25)
+                                             ])
+        else:
+            transform = transforms.Compose([transforms.ToTensor(),
+                                             transforms.Normalize((0.1307,), (0.3081,)),])
+        return transform
+    
+    def __getitem__(self, idx):
+        img, label = self.dataset[idx]
+        return img, label #img.repeat(3, 1, 1), label
+        
+    def __len__(self):
+        return len(self.dataset)
+
+class MNIST_C_ds(Dataset):
+    def __init__(self, path, type='translate', data='train', dtype=torch.float32):
+        """
+        Reads MNIST-C .npy files as torch tensor
+
+        inputs:
+        path: (string) path to mnist_c dataset.
+        type: (string) type of corruptions (brightness, canny_edges, ..., rotate, scale, translate, ...)
+        data: (string) 'train' or 'test' data
+        dtype: (type) data type (default: torch.float32)
+        """
+        super(MNIST_C_ds, self).__init__()
+        path_to_type = os.path.join(path,type) # path to directory
+
+        self.img = np.load(os.path.join(path_to_type, '{}_images.npy'.format(data))) # image data
+        self.lab = np.load(os.path.join(path_to_type, '{}_labels.npy'.format(data))) # label data
+        
+        self.img = torch.tensor(self.img, dtype=dtype)
+        transform = transforms.Compose([transforms.Normalize((0.1307,), (0.3081,)),])
+        self.img = transform(self.img)
+        self.lab = torch.tensor(self.lab, dtype=torch.int64) # labels must be integers
+
+        #train_img = np.load(os.path.join(path_to_type, 'train_images.npy')) # image data
+        #train_lab = np.load(os.path.join(path_to_type, 'train_labels.npy')) # label data
+        #test_img = np.load(os.path.join(path_to_type, 'test_images.npy'))
+        #test_lab = np.load(os.path.join(path_to_type, 'test_labels.npy'))
+
+        #self.train_img = torch.tensor(train_img)
+        #self.train_lab = torch.tensor(train_lab)
+        #self.test_img = torch.tensor(test_img)
+        #self.test_lab = torch.tensor(test_lab)
+
+    def __getitem__(self, idx):
+        return self.img[idx], self.lab[idx]
+    
+    def __len__(self):
+        return len(self.lab)
+        #return self.ImageSet.shape[0]
+
+
+
+>>>>>>> Stashed changes
 def ImageNet(root='data/ImageNet1k/', flat=True, dtype=torch.float32, verbose=True, show=False, evalmode=False, intensity=1):
     trainset = ImageNet_dataset(root=root, train=True, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
     valset = ImageNet_dataset(root=root, train=False, dtype=dtype, flat=flat, evalmode=evalmode, intensity=intensity)
