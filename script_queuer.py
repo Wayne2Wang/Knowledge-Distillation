@@ -30,12 +30,19 @@ if mode=='eval':
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.8 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 1.6 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt'
             #]#,
-            [' --modelpath log/MNIST/MLP_drop_bnorm2/CNN_JP2/30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
-             ' --modelpath log/MNIST/MLP_drop_bnorm2/CNN_JP2/30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
-             ' --modelpath log/MNIST/MLP_drop_bnorm2/CNN_JP2/30_model_KD.pt --dataset MNIST --root D:/Research/Dataset/MNIST',
-             ' --modelpath log/MNIST/MLP_drop_bnorm2/30_model.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
-             ' --modelpath log/MNIST/MLP_drop_bnorm2/30_model.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
-             ' --modelpath log/MNIST/MLP_drop_bnorm2/30_model.pt --dataset MNIST --root D:/Research/Dataset/MNIST'
+            [
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/CNN_JP2/30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/CNN_JP2/30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/CNN_JP2/30_model_KD.pt --dataset MNIST --root D:/Research/Dataset/MNIST',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/30_model.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/30_model.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_kd_featurematching_hook1/30_model.pt --dataset MNIST --root D:/Research/Dataset/MNIST',
+             ' --modelpath log/MNIST/MLP_drop_bnorm/CNN_MNIST/60_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
+             ' --modelpath log/MNIST/MLP_drop_bnorm/CNN_MNIST/60_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
+             ' --modelpath log/MNIST/MLP_drop_bnorm/CNN_MNIST/60_model_KD.pt --dataset MNIST --root D:/Research/Dataset/MNIST',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_CNN_JP2/MLP_drop_bnorm2_CNN_JP2_30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype translate',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_CNN_JP2/MLP_drop_bnorm2_CNN_JP2_30_model_KD.pt --dataset MNIST_C --root D:/Research/Dataset/MNIST-C/mnist_c --augtype scale',
+             ' --modelpath log/MNIST/MLP_drop_bnorm2_CNN_JP2/MLP_drop_bnorm2_CNN_JP2_30_model_KD.pt --dataset MNIST --root D:/Research/Dataset/MNIST'
             ]
             ]
     for i in range(len(python_scripts_to_run)):

@@ -183,12 +183,13 @@ class CNN_JP2(torch.nn.Module):
             torch.nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1), # (128, 3, 3)
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
-            torch.nn.AvgPool2d(kernel_size=3, stride=1, padding=0) # (128, 1, 1)
+            #torch.nn.AvgPool2d(kernel_size=3, stride=1, padding=0) # (128, 1, 1) # we don't need this lol
         )
         self.fc = torch.nn.Linear(128, output_dim)
 
     def forward(self, x):
-        x = self.cnn_layers(x) # 3, 28, 28 -> 128, 1, 1
-        x = torch.flatten(x, start_dim=1) # 128
+        x = self.cnn_layers(x) # 3, 28, 28 -> 128, 3, 3
+        x = x.mean([2, 3]) # 128,
+        #x = torch.flatten(x, start_dim=1) # 128
         x = self.fc(x)
         return x

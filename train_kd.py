@@ -41,8 +41,8 @@ def parse_arg():
     parser.add_argument('--alpha', type=float, default=0.3, help='hyperparmeter')
     parser.add_argument('--temp', type=float, default=7, help='temperature')
     parser.add_argument('--reg', default=1e-3, type=float, help="Specify the strength of the regularizer")
-    parser.add_argument('--thook', type=str, default='layername', help='Name of the teacher layer to match')
-    parser.add_argument('--shook', type=str, default='layername', help='Name of the student layer to match')
+    parser.add_argument('--hook', type=int, default=0, help='0: (Default) do not match features, 1: match features, 2: match features and logits')
+    #parser.add_argument('--shook', type=str, default='layername', help='Name of the student layer to match') 
     # MNIST-C Specific settings
     parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
     
@@ -66,8 +66,9 @@ def train_kd(teacherModel,
             batch_size = 64, 
             save_every = 5,
             verbose = False,
-            teacherhook='layername', # name of layer to hook
-            studenthook='layername', # name of layer to hook
+            hook=0,
+            hook_scale=2, # scaling for hook loss. Used to match KLDivloss scale vs hook loss scale. 
+            hook_loss_metric=torch.nn.MSELoss(), # hook loss initially starts around 1.3 for CNN_JP2 and MLP_bnorm_drop2
             device='cpu'
             ):
 
@@ -109,7 +110,7 @@ def train_kd(teacherModel,
             # clear gradient
             optimizerStudent.zero_grad()
 
-            if teacherhook != 'layername': # if defined
+            if hook != 0: # if defined
                 features={} # dict to store the intermediate activation
                 def get_features(name):
                     """
@@ -132,14 +133,16 @@ def train_kd(teacherModel,
             student_preds = studentModel(x_batch.reshape(x_batch.shape[0],-1))
             student_loss_value = student_loss(student_preds, y_batch)
             
-            if teacherhook=='layername': # if not specified, do KL Div on output
+            if hook != 1:
+                # only calculate distillation loss if we are using them.
                 distillation_loss = divergence_loss(
                     torch.nn.functional.log_softmax(student_preds / temp, dim=1),
                     torch.nn.functional.softmax(teacher_preds / temp, dim=1)
                 )
-            else:
-                distillation_loss = divergence_loss( # this should be L1 or L2 loss (MSE loss)
-                    studentModel.relu(features['student_out']), features['teacher_out'].flatten(start_dim=1)
+            if hook != 0:
+                # only calculate hook loss if we are using them
+                hook_loss = hook_loss_metric( # this should be L1 or L2 loss (MSE loss)
+                    studentModel.relu(features['student_out']), features['teacher_out'].mean([2, 3])
                 )
 
             # Compute train acc
@@ -147,6 +150,12 @@ def train_kd(teacherModel,
             metric5.update(student_preds, y_batch)
 
             # Record loss   
+            if hook == 1:
+                distillation_loss = hook_scale*hook_loss # hook loss replaces the distillation loss here
+            elif hook == 2:
+                # distillation loss becomes the sum between distillation loss and hook loss
+                distillation_loss += hook_scale*hook_loss
+                distillation_loss /= 2 # or mean...
             loss = alpha * student_loss_value + (1 - alpha) * (temp**2) * distillation_loss
             loss_value = loss.item()
             total_loss += loss_value
@@ -157,8 +166,9 @@ def train_kd(teacherModel,
 
             optimizerStudent.step()
 
-            hteacher.remove()
-            hstudent.remove()
+            if hook != 0:
+                hteacher.remove() # unhook. otherwise cause errors!
+                hstudent.remove()
 
         # Evaluate this epoch
         total_loss /= train_size
@@ -223,8 +233,9 @@ def mainkd(
     alpha,
     regstr,
     augtype,
-    teacherhook='layername',
-    studenthook='layername'
+    hook=0,
+    hook_scale=2,
+    hook_loss_metric=torch.nn.MSELoss(),
 ):
     
     std_model_method = globals()[student_name] # call function with 'modelname' name
@@ -286,10 +297,7 @@ def mainkd(
     prev_epoch = 0
     optimizerStudent = torch.optim.AdamW(studentModel.parameters(), lr=lr, weight_decay=regstr)
     student_loss = torch.nn.CrossEntropyLoss()
-    if teacherhook == 'layername':
-        divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
-    else:
-        divergence_loss = torch.nn.MSELoss()
+    divergence_loss = torch.nn.KLDivLoss(reduction="batchmean")
 
     # Load previously trained model if specified
     if not load_model == '':
@@ -319,8 +327,9 @@ def mainkd(
                                     save_every=save_every,
                                     device = device,
                                     verbose = verbose,
-                                    teacherhook=teacherhook,
-                                    studenthook=studenthook
+                                    hook=hook,
+                                    hook_scale=hook_scale,
+                                    hook_loss_metric=hook_loss_metric,
                                     )
 
     if verbose:
@@ -352,36 +361,36 @@ if __name__ == '__main__':
     regstr = args.reg
     augtype = args.augtype
 
-    teacherhook = args.thook
-    studenthook = args.shook
+    hook = args.hook
 
     custom_args = True # custom args for debugging
     if custom_args:
         load_model = ''
         verbose = True
-        dataset = 'MNIST_C'
+        dataset = 'MNIST'
         save_every = 1
 
         student_name = 'MLP_drop_bnorm2' #MLP_drop_bnorm2
         teacher_name = 'CNN_JP2' #CNN_JP2
-        root = 'D:/Research/Dataset/MNIST-C/mnist_c'#root = 'D:/Research/Dataset/MNIST-C/mnist_c'
+        root = 'D:/Research/Dataset/MNIST'#root = 'D:/Research/Dataset/MNIST-C/mnist_c'
 
         epochs = 30
         batch_size = 64
         lr = 5e-4
         hidden_sizes = [256, 256, 128, 128]
-        temp = 10**0.5
-        alpha = 0.3
+        temp = 1
+        alpha = 0.2
         regstr=1e-3
         augtype='translate'
         
-        teacherhook = 'cnn_layers'
-        studenthook = 'fc'
+        hook=2
+        hook_scale=2
+        hook_loss_metric = torch.nn.MSELoss()
 
 
     mainkd( # pass to main ftn
         load_model, verbose, dataset, save_every,
         student_name, teacher_name, root, epochs,
         batch_size, lr, hidden_sizes, temp, alpha, regstr, augtype,
-        teacherhook, studenthook
+        hook, hook_scale, hook_loss_metric
     )
