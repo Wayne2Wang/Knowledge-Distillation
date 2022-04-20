@@ -247,6 +247,7 @@ class MNIST_C_ds(Dataset):
         self.img = (self.img - torch.min(self.img)) / (torch.max(self.img) - torch.min(self.img)) # normalize data
         transform = transforms.Compose([transforms.Normalize((0.1307,), (0.3081,)),]) # zero-mean / 1-std data
         self.img = transform(self.img)
+        self.img = self.img.permute((0,3,1,2))
         self.lab = torch.tensor(self.lab, dtype=torch.int64) # labels must be integers
 
         #train_img = np.load(os.path.join(path_to_type, 'train_images.npy')) # image data

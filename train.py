@@ -32,7 +32,7 @@ def parse_arg():
     
     ### model checkpoint
     parser.add_argument('--load_model', type=str, default='', help='Resume training from load_model if not empty')
-    parser.add_argument('--save_every', type=int, default=1, help='Save every x epochs')
+    parser.add_argument('--save_every', type=int, default=5, help='Save every x epochs')
 
     args = parser.parse_args()
     return args
@@ -103,7 +103,8 @@ def main():
     elif modelname=='MLP':
         model = modelmethod(input_size, hidden_sizes, output_size)
         summary(model, (1,)+tuple(input_size), device='cpu')
-    elif modelname == 'CNN_MNIST' or modelname=='CNN_JP1' or modelname=='CNN_JP2':
+    elif modelname == 'CNN_MNIST' or modelname=='CNN_JP1' or modelname=='CNN_JP2' \
+        or modelname[0:3] == 'CNN':
         model = modelmethod(input_size[0], output_size)
         summary(model, tuple(input_size), device='cpu')
     else: ### currently only works for MLP

@@ -3,6 +3,8 @@ import torch
 import torchvision
 import torchmetrics
 import torchsummary
+import pandas as pd
+import os
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datasets import *
@@ -23,7 +25,7 @@ def parse_arg():
     parser.add_argument('--augment', type=float, default=-1, help='Set intensity for augmented dataset evaluation (-1:off)')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='Dataset to evaluate on')
     parser.add_argument('--root', default='data/CIFAR10', help='Set root of dataset')
-    parser.add_argument('--num_batches', type=int, default=1000, help='Max number of batches to evaluate on')
+    parser.add_argument('--num_batches', type=int, default=1e9, help='Max number of batches to evaluate on (Default: 1e9)')
     parser.add_argument('--outfilepath', default='', help='output result to this file if specified')
     # MNIST-C Specific settings
     parser.add_argument('--augtype', type=str, default='translate', help='Data augmentation type for MNIST-C dataset. Will focus mostly on scale and translate')
@@ -151,10 +153,27 @@ def main():
     print('Model = {}'.format(type(model).__name__))
 
     # evaluation on trainset: Train acc1 is 0.966796875, train acc5 is 0.99609375 over 4 batchs
-    eval_acc(model, train_loader, device, verbose=verbose, num_batches=num_batches, mode='train', write_file=write_file, intensity=augment_data)
+    train_acc1, train_acc5 = eval_acc(model, train_loader, device, verbose=verbose, num_batches=num_batches, mode='train', write_file=write_file, intensity=augment_data)
 
     # evaluation on valset: Validation acc1 is 0.75390625, validation acc5 is 0.931640625 over 4 batchs
-    eval_acc(model, val_loader, device, verbose=verbose, num_batches=num_batches, mode='validation', write_file=write_file, intensity=augment_data)
+    validation_acc1, validation_acc5 =  eval_acc(model, val_loader, device, verbose=verbose, num_batches=num_batches, mode='validation', write_file=write_file, intensity=augment_data)
+
+    
+
+    if (write_file != ''):
+        try: 
+            results_df = pd.read_csv(write_file)
+            results_df = results_df.dropna(axis=0)
+            results_df = results_df.dropna(axis=1)
+            results_df = results_df.drop(columns=['Unnamed: 0']) # what is this row lol
+        except:
+            results_df = pd.DataFrame()
+        data = [[type(model).__name__, os.path.basename(modelpath), dataset, train_acc1.item(),\
+            validation_acc1.item(), augment_data]]
+        d = pd.DataFrame(data, columns = ['Student Model', 'Model Path', 'Dataset', 'Train Acc', 'Validation Acc', 'Augmentation Intensity'])
+        results_df = pd.concat((results_df, d), axis=0, ignore_index = True)
+
+        results_df.to_csv(write_file)
 
 
 if __name__ == '__main__':
