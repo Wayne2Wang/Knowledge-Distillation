@@ -204,16 +204,16 @@ def train_kd(teacherModel,
         train_acc = train_acc1, train_acc5
         val_acc = val_acc1, val_acc5
         if (epoch+1)%save_every == 0:
-            save_checkpoint('{}/{}/{}_{}_h{}_{}.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, real_epoch),studentModel, real_epoch,\
+            save_checkpoint('{}/{}/{}_{}_h{}_t{}_{}.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, temp, real_epoch),studentModel, real_epoch,\
              optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
 
 
     if not epochs%save_every == 0:
-        save_checkpoint('{}/{}/{}_{}_h{}_{}.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, real_epoch),studentModel, real_epoch,\
+        save_checkpoint('{}/{}/{}_{}_h{}_t{}_{}.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, temp, real_epoch),studentModel, real_epoch,\
              optimizerStudent, student_loss, total_loss, train_acc, val_acc, verbose=verbose)
     
     ### Save whole model (no need to redefine it -- for evaluation purposes)
-    torch.save(studentModel, 'log/{}/{}/{}_{}_h{}_{}_model_KD.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, real_epoch))
+    torch.save(studentModel, 'log/{}/{}/{}_{}_h{}_t{}_{}_model_KD.pt'.format(dataset, model_name_student, model_name_student, model_name_teacher, hook, temp, real_epoch))
     
     total_time = time.time() - start_time
     best_train_acc = best_train_acc1, best_train_acc5

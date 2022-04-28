@@ -11,7 +11,7 @@ import subprocess
 from time import sleep
 
 #--modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment -1 --dataset CIFAR10 --root data/CIFAR10
-mode = 'train'
+mode = 'eval'
 procs = []
 if mode=='eval':
     print("Current setting: translation only")
@@ -23,26 +23,26 @@ if mode=='eval':
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_20_model.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_result.csv',
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_20_model.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_result.csv',
 
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
-             #' --modelpath assets/CNN_JP4_8_model.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_5_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
+             ' --modelpath assets/CNN_JP4_30_model.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath assets/CNN_JP4_30_model_result.csv',
 
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h2_20_model_KD.csv',
 
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
-             ' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_20_model_KD.csv',
 
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.csv',
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.csv',
@@ -50,6 +50,27 @@ if mode=='eval':
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.csv',
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.csv',
              #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h1_t1.0_20_model_KD.csv',
+
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t7.0_20_model_KD.csv',
+
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment -1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment 0.1 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment 0.2 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment 0.4 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment 0.8 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+             #' --modelpath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.pt --augment 1.6 --dataset CIFAR10 --root D:/Research/Dataset/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_bnorm3/MLP_drop_bnorm3_CNN_JP4_h0_t21.0_20_model_KD.csv',
+
             ],
             #[' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment -1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
             #' --modelpath log/CIFAR10/MLP_drop_bnorm_CifarResNet_59_model_KD.pt --augment 0.1 --dataset CIFAR10 --root data/CIFAR10 --outfilepath log/CIFAR10/MLP_drop_brnom_KD_eval.txt',
@@ -86,9 +107,9 @@ elif mode=='train':
             #[' --model CNN_JP4 --lr 1e-3 --bs 256 --reg 5e-3 --dataset CIFAR10 --verbose --epochs 5 --root D:/Research/Dataset/CIFAR10'],
             #[' --model MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 256 --hs 1024 512 256 128 --dataset CIFAR10 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10'],
             [
-                ' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=2 --hook_scale=2 --kl_scale=1',
-                ' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=1 --hook_scale=2 --kl_scale=1',
-                #' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=0 --hook_scale=0 --kl_scale=0.5',
+                ' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.1 --temp 1 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=0 --hook_scale=1 --kl_scale=1',
+                #' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.1 --temp 7 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=0 --hook_scale=0 --kl_scale=1',
+                #' --stdmodel MLP_drop_bnorm3 --lr 1e-3 --reg 1e-2 --bs 128 --hs 1024 512 256 128 --dataset CIFAR10 --alpha=0.1 --temp 21 --verbose --epochs 20 --root D:/Research/Dataset/CIFAR10 --hook=0 --hook_scale=0 --kl_scale=1',
             ],
             #[' --stdmodel MLP_drop_bnorm --lr 1e-3 --bs 256 --hs 512 256 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 60 --root "D:/Research/Dataset/CIFAR10"']#,
             #' --stdmodel MLP_drop_bnorm --load_model log/CIFAR10/MLP_drop_bnorm_CifarResNet_56.pt --lr 1e-3 --bs 256 --hs 512 512 256 256 128 128 --dataset CIFAR10 --alpha=0.3 --temp 1 --verbose --epochs 0 --root "D:/Research/Dataset/CIFAR10"'
