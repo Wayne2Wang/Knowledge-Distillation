@@ -1,13 +1,5 @@
 # Knowledge-Distillation
 
-**TODO**: 
-- [ ] Implement more efficient dataloader(FFCV/WebDataset/ImageFolder/Nvidia DALI): FFCV is the first option but it works only on Linux
-- [ ] Improve MLP model(Dropout etc.) and tune the hyperparameter for MLP training
-- [ ] Set up Knowledge Distillation pipeline (generic enough to take different teachers and students)
-- [ ] Extend eval.py to evaluate any models
-- [ ] Implement image augmentation in datasest.py
-- [ ] If needed, implement more dataset classes
-- [ ] If needed, deploy to Great Lakes
 
 List of pretrained CIFAR Models (by chenyaofo):
 https://github.com/chenyaofo/pytorch-cifar-models
@@ -36,22 +28,11 @@ Evaluate example arguments
 eval.py --modelpath log/CIFAR10/MLP_drop_CifarResNet_1_model_KD.pt --augment --dataset CIFAR10 --num_batches 1000 --root "G:/My Drive/DL Data/"
 ```
 
-To train the MLP, run
-```
-python train.py
-```
-To train a ResNet18(pretrained) for testing purpose, run
-```
-python train.py --resnet
-```
 To resume training, run
 ```
 python train.py --load_model PATH_TO_MODEL
 ```
-To evaluate the pretrained ResNet18, run
-```
-python eval.py
-```
+
 To view training stats, run
 ```
 tensorboard --logdir log/DATASET
